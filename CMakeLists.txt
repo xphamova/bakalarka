@@ -1,0 +1,12 @@
+cmake_minimum_required(VERSION 3.17)
+project(bakalarka C)
+
+set(CMAKE_C_STANDARD 99)
+set(CMAKE_CXX_FLAGS "-lglut")
+set(CMAKE_CXX_FLAGS "-lGL")
+set(CMAKE_CXX_FLAGS "-lGLU")
+include_directories(GL/)
+add_library(bakalarka main.c galaxy.c)
+add_executable(bp main.c)
+target_link_libraries( bp m)
+target_link_libraries(bp -lglut -lGL -lGLU)
