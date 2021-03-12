@@ -3,6 +3,9 @@
 #include "galaxy.c"
 #include "time.h"
 #include "stdio.h"
+#include <stdlib.h>
+#include <time.h>
+#include <pthread.h>
 
 void reshape(int, int);
 
@@ -10,13 +13,19 @@ void myInit();
 
 void myDraw();
 
-void gravity_calculate_acceleration();
+void gravity_calculate_acceleration(int,int);
 
-void gravity_calculate_acceleration2();
+void gravity_calculate_acceleration2(int,int);
 
 void integrator_leapfrog();
 
 void integrator_leapfrog2();
+
+void *calculate_galaxy2(void*);
+
+void* calculate_galaxy1(void*);
+
+void start_cal();
 
 
 #define num_star 500
@@ -111,9 +120,7 @@ void myDraw() {
     glPointSize(1.0);
     glBegin(GL_POINTS);
 
-
-     integrator_leapfrog();
-//    integrator_leapfrog2();
+    start_cal();
     printf("p:%f\n",galaxy.stars[1].position.x);
     printf("a:%f\n",galaxy.stars[1].acceleration.x);
     printf("v:%f\n",galaxy.stars[1].velocity.x);
@@ -132,23 +139,48 @@ void myDraw() {
 }
 
 
-void integrator_leapfrog() {
-    for (int i = 0; i < num_star; i++) {
-        //prva
+void start_cal(){
+    int range1[2], range2[2];
+    void *send_range1, *send_range2;
+    double *receive_range1, *receive_range2, *receive_range3, *receive_range4;
+    range1[0]=0;
+    range1[1]= num_star/2;
+    range2[0]=num_star/2;
+    range2[1]=num_star;
+
+    send_range1 = &range1;
+    send_range2 = &range2;
+
+    pthread_t tid1, tid2, tid3, tid4;
+
+    //prva galaxia
+    pthread_create(&tid1, NULL, calculate_galaxy1, (void *) send_range1);//start thread
+    pthread_create(&tid2, NULL, calculate_galaxy1, (void *) send_range2);
+    //druha
+    pthread_create(&tid3, NULL, calculate_galaxy2, (void *) send_range1);
+    pthread_create(&tid4, NULL, calculate_galaxy2, (void *) send_range2);
+
+    pthread_join(tid1, (void **) &receive_range1);
+    pthread_join(tid2, (void **) &receive_range2);
+    pthread_join(tid3, (void **) &receive_range3);
+    pthread_join(tid4, (void **) &receive_range4);
+}
+
+void* calculate_galaxy1(void* param){
+    int *ran = (int *) param;
+    int start, end;
+
+    start = *(ran);
+    end = *(ran + 1);
+
+    for(int i = start; i<end; i++){
         galaxy.stars[i].position.x += half_time_step * galaxy.stars[i].velocity.x;
         galaxy.stars[i].position.y += half_time_step * galaxy.stars[i].velocity.y;
         galaxy.stars[i].position.z += half_time_step * galaxy.stars[i].velocity.z;
-
-        //druha
-        galaxy2.stars[i].position.x += half_time_step * galaxy2.stars[i].velocity.x;
-        galaxy2.stars[i].position.y += half_time_step * galaxy2.stars[i].velocity.y;
-        galaxy2.stars[i].position.z += half_time_step * galaxy2.stars[i].velocity.z;
     }
+    gravity_calculate_acceleration(start,end);
 
-    gravity_calculate_acceleration();
-    gravity_calculate_acceleration2();
-    for (int i = 0; i < num_star; i++) {
-        //prva
+    for(int i = start; i<end; i++){
 
         galaxy.stars[i].velocity.x += time_step * galaxy.stars[i].acceleration.x;
         galaxy.stars[i].velocity.y += time_step * galaxy.stars[i].acceleration.y;
@@ -157,8 +189,25 @@ void integrator_leapfrog() {
         galaxy.stars[i].position.x += half_time_step * galaxy.stars[i].velocity.x;
         galaxy.stars[i].position.y += half_time_step * galaxy.stars[i].velocity.y;
         galaxy.stars[i].position.z += half_time_step * galaxy.stars[i].velocity.z;
+    }
 
-        //druha
+}
+
+void *calculate_galaxy2(void* param) {
+    int *ran = (int *) param;
+    int start, end;
+
+    start = *(ran);
+    end = *(ran + 1);
+
+    for (int i = start; i < end; i++) {
+        galaxy2.stars[i].position.x += half_time_step * galaxy2.stars[i].velocity.x;
+        galaxy2.stars[i].position.y += half_time_step * galaxy2.stars[i].velocity.y;
+        galaxy2.stars[i].position.z += half_time_step * galaxy2.stars[i].velocity.z;
+    }
+
+    gravity_calculate_acceleration2(start,end);
+    for (int i = start; i < end; i++) {
         galaxy2.stars[i].velocity.x += time_step * galaxy2.stars[i].acceleration.x;
         galaxy2.stars[i].velocity.y += time_step * galaxy2.stars[i].acceleration.y;
         galaxy2.stars[i].velocity.z += time_step * galaxy2.stars[i].acceleration.z;
@@ -166,51 +215,14 @@ void integrator_leapfrog() {
         galaxy2.stars[i].position.x += half_time_step * galaxy2.stars[i].velocity.x;
         galaxy2.stars[i].position.y += half_time_step * galaxy2.stars[i].velocity.y;
         galaxy2.stars[i].position.z += half_time_step * galaxy2.stars[i].velocity.z;
-
     }
-
-}
-//iny sposob ratania
-void integrator_leapfrog2(){
-
-    for(int i=0; i<num_star; i++){
-        galaxy.stars[i].velocity.x += half_time_step * galaxy.stars[i].acceleration.x;
-        galaxy.stars[i].velocity.y += half_time_step * galaxy.stars[i].acceleration.y;
-        galaxy.stars[i].velocity.z += half_time_step * galaxy.stars[i].acceleration.z;
-
-        galaxy2.stars[i].velocity.x += half_time_step * galaxy2.stars[i].acceleration.x;
-        galaxy2.stars[i].velocity.y += half_time_step * galaxy2.stars[i].acceleration.y;
-        galaxy2.stars[i].velocity.z += half_time_step * galaxy2.stars[i].acceleration.z;
-    }
-    for(int i=0; i<num_star; i++){
-        galaxy.stars[i].position.x += time_step * galaxy.stars[i].velocity.x;
-        galaxy.stars[i].position.y += time_step * galaxy.stars[i].velocity.y;
-        galaxy.stars[i].position.z += time_step * galaxy.stars[i].velocity.z;
-
-        galaxy2.stars[i].position.x += time_step * galaxy2.stars[i].velocity.x;
-        galaxy2.stars[i].position.y += time_step * galaxy2.stars[i].velocity.y;
-        galaxy2.stars[i].position.z += time_step * galaxy2.stars[i].velocity.z;
-    }
-    gravity_calculate_acceleration();
-    gravity_calculate_acceleration2();
-
-    for(int i=0; i<num_star; i++){
-        galaxy.stars[i].velocity.x += half_time_step * galaxy.stars[i].acceleration.x;
-        galaxy.stars[i].velocity.y += half_time_step * galaxy.stars[i].acceleration.y;
-        galaxy.stars[i].velocity.z += half_time_step * galaxy.stars[i].acceleration.z;
-
-        galaxy2.stars[i].velocity.x += half_time_step * galaxy2.stars[i].acceleration.x;
-        galaxy2.stars[i].velocity.y += half_time_step * galaxy2.stars[i].acceleration.y;
-        galaxy2.stars[i].velocity.z += half_time_step * galaxy2.stars[i].acceleration.z;
-    }
-
 }
 
 //vypocet pre prvu
-void gravity_calculate_acceleration() {
+void gravity_calculate_acceleration(int start, int end) {
     double G = 6.6742367e-11; // m^3.kg^-1.s^-2
     double EPS =3e4;
-    for (int i = 0; i < num_star; i++) {
+    for (int i = start; i < end; i++) {
         galaxy.stars[i].acceleration.x = 0;
         galaxy.stars[i].acceleration.y = 0;
         galaxy.stars[i].acceleration.z = 0;
@@ -258,10 +270,10 @@ void gravity_calculate_acceleration() {
 }
 
 //vypocet pre druhu
-void gravity_calculate_acceleration2() {
+void gravity_calculate_acceleration2(int start, int end) {
     double G = 6.6742367e-11; // m^3.kg^-1.s^-2
     double EPS =3e4;
-    for (int i = 0; i < num_star; i++) {
+    for (int i = start; i < end; i++) {
         galaxy2.stars[i].acceleration.x = 0;
         galaxy2.stars[i].acceleration.y = 0;
         galaxy2.stars[i].acceleration.z = 0;
