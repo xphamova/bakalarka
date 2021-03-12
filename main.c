@@ -19,7 +19,7 @@ void integrator_leapfrog();
 void integrator_leapfrog2();
 
 
-#define num_star 1000
+#define num_star 500
 
 double half_time_step;
 double time_step;
@@ -34,7 +34,7 @@ int main(int argc, char *argv[]) {
 
     //prva galaxia
     VECTOR galaxy_center, velocity;
-    galaxy_center.x = 2;
+    galaxy_center.x = 1;
     galaxy_center.y = 1;
     galaxy_center.z = 1;
 
@@ -46,7 +46,7 @@ int main(int argc, char *argv[]) {
 
     //druha galaxia
     VECTOR galaxy_center_2, velocity2;
-    galaxy_center_2.x = -2;
+    galaxy_center_2.x = -1;
     galaxy_center_2.y = 1;
     galaxy_center_2.z = 1;
 
@@ -56,7 +56,7 @@ int main(int argc, char *argv[]) {
 
     galaxy2 = create_galaxy(height_magnitude, height_frequency, num_star, galaxy_center_2, velocity2);
 
-    time_step = 1.0/32.0;
+    time_step = 1.0/64.0;
     half_time_step = 0.5 * time_step;
 
     /* Initialize window system */
@@ -114,6 +114,9 @@ void myDraw() {
 
      integrator_leapfrog();
 //    integrator_leapfrog2();
+    printf("p:%f\n",galaxy.stars[1].position.x);
+    printf("a:%f\n",galaxy.stars[1].acceleration.x);
+    printf("v:%f\n",galaxy.stars[1].velocity.x);
 
     glColor3f(1.0, 1.0, 1.0);
     for (int i = 0; i < num_star; i++) {
@@ -206,47 +209,50 @@ void integrator_leapfrog2(){
 //vypocet pre prvu
 void gravity_calculate_acceleration() {
     double G = 6.6742367e-11; // m^3.kg^-1.s^-2
-
+    double EPS =3e4;
     for (int i = 0; i < num_star; i++) {
-
-        double sum_x = 0, sum_y = 0, sum_z = 0;
+        galaxy.stars[i].acceleration.x = 0;
+        galaxy.stars[i].acceleration.y = 0;
+        galaxy.stars[i].acceleration.z = 0;
         for (int j = 0; j < num_star; j++) {
             if (j == i) {
 
                 double dx2 = galaxy.stars[i].position.x - galaxy2.stars[j].position.x;
                 double dy2 = galaxy.stars[i].position.y - galaxy2.stars[j].position.y;
                 double dz2 = galaxy.stars[i].position.z - galaxy2.stars[j].position.z;
-                double r2 = sqrt(dx2 * dx2 + dy2 * dy2 + dz2 * dz2);
-                double a2 = -G*galaxy2.stars[j].mass/pow(r2,2);
-                sum_x += a2/r2*dx2;
-                sum_y += a2/r2*dy2;
-                sum_z += a2/r2*dz2;
+                double dist2 = sqrt(dx2 * dx2 + dy2 * dy2 + dz2 * dz2);
+                double preff2 = pow(dist2,2) + pow(EPS,2);
+                double pref2 = -G/pow(preff2,1.5)*galaxy.stars[j].mass;
+                galaxy.stars[i].acceleration.x += pref2 * dx2;
+                galaxy.stars[i].acceleration.y += pref2 * dy2;
+                galaxy.stars[i].acceleration.z += pref2 * dz2;
                 continue;
             }
             //vypocet vzdielonosti medzi hviezdami vramci svojej galaxie
             double dx = galaxy.stars[i].position.x - galaxy.stars[j].position.x;
             double dy = galaxy.stars[i].position.y - galaxy.stars[j].position.y;
             double dz = galaxy.stars[i].position.z - galaxy.stars[j].position.z;
-            double r = sqrt(dx * dx + dy * dy + dz * dz);
-            double a = -G*galaxy.stars[j].mass/pow(r,2);
-            sum_x += a/r*dx;
-            sum_y += a/r*dy;
-            sum_z += a/r*dz;
+            double dist = sqrt(dx * dx + dy * dy + dz * dz);
+            double preff = pow(dist,2) + pow(EPS,2);
+            double pref = -G/pow(preff,1.5)*galaxy.stars[j].mass;
+            galaxy.stars[i].acceleration.x += pref * dx;
+            galaxy.stars[i].acceleration.y += pref * dy;
+            galaxy.stars[i].acceleration.z += pref * dz;
+
 
             //s druhou galaxiou
             double dx2 = galaxy.stars[i].position.x - galaxy2.stars[j].position.x;
             double dy2 = galaxy.stars[i].position.y - galaxy2.stars[j].position.y;
             double dz2 = galaxy.stars[i].position.z - galaxy2.stars[j].position.z;
-            double r2 = sqrt(dx2 * dx2 + dy2 * dy2 + dz2 * dz2);
-            double a2 = -G*galaxy2.stars[j].mass/pow(r2,2);
-            sum_x += a2/r2*dx2;
-            sum_y += a2/r2*dy2;
-            sum_z += a2/r2*dz2;
+            double dist2 = sqrt(dx2 * dx2 + dy2 * dy2 + dz2 * dz2);
+            double preff2 = pow(dist2,2) + pow(EPS,2);
+            double pref2 = -G/pow(preff2,1.5)*galaxy.stars[j].mass;
+            galaxy.stars[i].acceleration.x += pref2 * dx2;
+            galaxy.stars[i].acceleration.y += pref2 * dy2;
+            galaxy.stars[i].acceleration.z += pref2 * dz2;
+
 
         }
-        galaxy.stars[i].acceleration.x = sum_x;
-        galaxy.stars[i].acceleration.y = sum_y;
-        galaxy.stars[i].acceleration.z = sum_z;
     }
 
 }
@@ -254,45 +260,47 @@ void gravity_calculate_acceleration() {
 //vypocet pre druhu
 void gravity_calculate_acceleration2() {
     double G = 6.6742367e-11; // m^3.kg^-1.s^-2
-
+    double EPS =3e4;
     for (int i = 0; i < num_star; i++) {
+        galaxy2.stars[i].acceleration.x = 0;
+        galaxy2.stars[i].acceleration.y = 0;
+        galaxy2.stars[i].acceleration.z = 0;
         double sum_x = 0, sum_y = 0, sum_z = 0;
         for (int j = 0; j < num_star; j++) {
             if (j == i) {
                 double dx2 = galaxy2.stars[i].position.x - galaxy.stars[j].position.x;
                 double dy2 = galaxy2.stars[i].position.y - galaxy.stars[j].position.y;
                 double dz2 = galaxy2.stars[i].position.z - galaxy.stars[j].position.z;
-                double r2 = sqrt(dx2 * dx2 + dy2 * dy2 + dz2 * dz2);
-                double a2 = -G*galaxy.stars[j].mass/pow(r2,2);
-                sum_x += a2/r2*dx2;
-                sum_y += a2/r2*dy2;
-                sum_z += a2/r2*dz2;
+                double dist2 = sqrt(dx2 * dx2 + dy2 * dy2 + dz2 * dz2);
+                double preff2 = pow(dist2,2) + pow(EPS,2);
+                double pref2 = -G/pow(preff2,1.5)*galaxy.stars[j].mass;
+                galaxy2.stars[i].acceleration.x += pref2 * dx2;
+                galaxy2.stars[i].acceleration.y += pref2 * dy2;
+                galaxy2.stars[i].acceleration.z += pref2 * dz2;
                 continue;
             }
             double dx = galaxy2.stars[i].position.x - galaxy2.stars[j].position.x;
             double dy = galaxy2.stars[i].position.y - galaxy2.stars[j].position.y;
             double dz = galaxy2.stars[i].position.z - galaxy2.stars[j].position.z;
-            double r = sqrt(dx * dx + dy * dy + dz * dz);
-            double a = -G*galaxy2.stars[j].mass/pow(r,2);
-            sum_x += a/r*dx;
-            sum_y += a/r*dy;
-            sum_z += a/r*dz;
+            double dist = sqrt(dx * dx + dy * dy + dz * dz);
+            double preff = pow(dist,2) + pow(EPS,2);
+            double pref = -G/pow(preff,1.5)*galaxy2.stars[j].mass;
+            galaxy2.stars[i].acceleration.x += pref * dx;
+            galaxy2.stars[i].acceleration.y += pref * dy;
+            galaxy2.stars[i].acceleration.z += pref * dz;
 
             //s druhou galaxiou
             double dx2 = galaxy2.stars[i].position.x - galaxy.stars[j].position.x;
             double dy2 = galaxy2.stars[i].position.y - galaxy.stars[j].position.y;
             double dz2 = galaxy2.stars[i].position.z - galaxy.stars[j].position.z;
-            double r2 = sqrt(dx2 * dx2 + dy2 * dy2 + dz2 * dz2);
-            double a2 = -G*galaxy.stars[j].mass/pow(r2,2);
-            sum_x += a2/r2*dx2;
-            sum_y += a2/r2*dy2;
-            sum_z += a2/r2*dz2;
+            double dist2 = sqrt(dx2 * dx2 + dy2 * dy2 + dz2 * dz2);
+            double preff2 = pow(dist2,2) + pow(EPS,2);
+            double pref2 = -G/pow(preff2,1.5)*galaxy.stars[j].mass;
+            galaxy2.stars[i].acceleration.x += pref2 * dx2;
+            galaxy2.stars[i].acceleration.y += pref2 * dy2;
+            galaxy2.stars[i].acceleration.z += pref2 * dz2;
 
         }
-        galaxy2.stars[i].acceleration.x = sum_x;
-        galaxy2.stars[i].acceleration.y = sum_y;
-        galaxy2.stars[i].acceleration.z = sum_z;
-
     }
 
 }

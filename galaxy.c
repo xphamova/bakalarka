@@ -15,7 +15,7 @@ typedef struct {
 } STAR;
 
 typedef struct {
-    STAR stars[1000];
+    STAR stars[500];
 } GALAXY;
 
 VECTOR star_position(double, double, double);
@@ -47,7 +47,7 @@ GALAXY create_galaxy(float heightMagnitude, float heightFrequency, int numStar, 
         galaxy.stars[i].acceleration.y = 0;
         galaxy.stars[i].acceleration.z = 0;
 
-        galaxy.stars[i].mass = 1e25;
+        galaxy.stars[i].mass = 1e27;
     }
     return galaxy;
 }
@@ -62,12 +62,12 @@ VECTOR star_position(double galaxy_center_x, double galaxy_center_y, double gala
     double rotationFactor = 2.0;
 
     // nastavenie vzdialenosti od stredu
-    double distance = rand_float_from_to(0, 1.5f);
+    double distance = rand_float_from_to(0, 1.0f);
     distance = pow(distance, 1.5);
 
     // nastavenie uhla
     double angle = rand_float_from_to(0, 1) * 2 * M_PI;
-    double arm_offset = rand_float_from_to(0, 1.5f) * max_arm_offset;
+    double arm_offset = rand_float_from_to(0, 1.0f) * max_arm_offset;
 
     arm_offset = arm_offset - max_arm_offset / 2;
     arm_offset = arm_offset * (1 / distance);
