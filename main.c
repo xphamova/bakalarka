@@ -17,10 +17,6 @@ void gravity_calculate_acceleration(int,int);
 
 void gravity_calculate_acceleration2(int,int);
 
-void integrator_leapfrog();
-
-void integrator_leapfrog2();
-
 void *calculate_galaxy2(void*);
 
 void* calculate_galaxy1(void*);
@@ -28,7 +24,7 @@ void* calculate_galaxy1(void*);
 void start_cal();
 
 
-#define num_star 500
+#define num_star 1000
 
 double half_time_step;
 double time_step;
@@ -43,11 +39,11 @@ int main(int argc, char *argv[]) {
 
     //prva galaxia
     VECTOR galaxy_center, velocity;
-    galaxy_center.x = 1;
+    galaxy_center.x = 0;
     galaxy_center.y = 1;
     galaxy_center.z = 1;
 
-    velocity.x = -15 * 1e5;
+    velocity.x = 20 * 1e5;
     velocity.y = 0;
     velocity.z = 0;
 
@@ -55,17 +51,17 @@ int main(int argc, char *argv[]) {
 
     //druha galaxia
     VECTOR galaxy_center_2, velocity2;
-    galaxy_center_2.x = -1;
+    galaxy_center_2.x = 1;
     galaxy_center_2.y = 1;
     galaxy_center_2.z = 1;
 
-    velocity2.x = 15 * 1e5;
+    velocity2.x = -20 * 1e5;
     velocity2.y = 0;
     velocity2.z = 0;
 
     galaxy2 = create_galaxy(height_magnitude, height_frequency, num_star, galaxy_center_2, velocity2);
 
-    time_step = 1.0/64.0;
+    time_step = 1.0/32.0;
     half_time_step = 0.5 * time_step;
 
     /* Initialize window system */
@@ -116,14 +112,11 @@ void myDraw() {
     glClear(GL_COLOR_BUFFER_BIT);
     glLoadIdentity();
 
-    gluLookAt(0.0f * 1e7, 10.0f * 1e7, -0.0f * 1e7, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f);
+    gluLookAt(0.0f * 1e7, 3.0f * 1e7, -0.0f * 1e7, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f);
     glPointSize(1.0);
     glBegin(GL_POINTS);
 
     start_cal();
-    printf("p:%f\n",galaxy.stars[1].position.x);
-    printf("a:%f\n",galaxy.stars[1].acceleration.x);
-    printf("v:%f\n",galaxy.stars[1].velocity.x);
 
     glColor3f(1.0, 1.0, 1.0);
     for (int i = 0; i < num_star; i++) {
