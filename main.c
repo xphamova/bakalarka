@@ -43,9 +43,10 @@ int main(int argc, char *argv[]) {
     galaxy_center.y = 1;
     galaxy_center.z = 1;
 
-    velocity.x = 20 * 1e5;
+    velocity.x = 15 * 1e5;
     velocity.y = 0;
     velocity.z = 0;
+
 
     galaxy = create_galaxy(height_magnitude, height_frequency, num_star, galaxy_center, velocity);
 
@@ -55,13 +56,13 @@ int main(int argc, char *argv[]) {
     galaxy_center_2.y = 1;
     galaxy_center_2.z = 1;
 
-    velocity2.x = -20 * 1e5;
+    velocity2.x = -15 * 1e5;
     velocity2.y = 0;
     velocity2.z = 0;
 
     galaxy2 = create_galaxy(height_magnitude, height_frequency, num_star, galaxy_center_2, velocity2);
 
-    time_step = 1.0/32.0;
+    time_step = 1.0/64.0;
     half_time_step = 0.5 * time_step;
 
     /* Initialize window system */
@@ -214,20 +215,20 @@ void *calculate_galaxy2(void* param) {
 //vypocet pre prvu
 void gravity_calculate_acceleration(int start, int end) {
     double G = 6.6742367e-11; // m^3.kg^-1.s^-2
-    double EPS =3e4;
+    double EPS =3e7;
     for (int i = start; i < end; i++) {
         galaxy.stars[i].acceleration.x = 0;
         galaxy.stars[i].acceleration.y = 0;
         galaxy.stars[i].acceleration.z = 0;
         for (int j = 0; j < num_star; j++) {
             if (j == i) {
-
                 double dx2 = galaxy.stars[i].position.x - galaxy2.stars[j].position.x;
                 double dy2 = galaxy.stars[i].position.y - galaxy2.stars[j].position.y;
                 double dz2 = galaxy.stars[i].position.z - galaxy2.stars[j].position.z;
-                double dist2 = sqrt(dx2 * dx2 + dy2 * dy2 + dz2 * dz2);
-                double preff2 = pow(dist2,2) + pow(EPS,2);
-                double pref2 = -G/pow(preff2,1.5)*galaxy.stars[j].mass;
+                double dist2 = sqrt(dx2 * dx2 + dy2 * dy2 + dz2 * dz2+EPS);
+              //  double preff2 = pow(dist2,2) + pow(EPS,2);
+               // double pref2 = -G/pow(preff2,1.5)*galaxy.stars[j].mass;
+               double pref2 = -G/pow(dist2,3)*galaxy.stars[j].mass;
                 galaxy.stars[i].acceleration.x += pref2 * dx2;
                 galaxy.stars[i].acceleration.y += pref2 * dy2;
                 galaxy.stars[i].acceleration.z += pref2 * dz2;
@@ -237,9 +238,10 @@ void gravity_calculate_acceleration(int start, int end) {
             double dx = galaxy.stars[i].position.x - galaxy.stars[j].position.x;
             double dy = galaxy.stars[i].position.y - galaxy.stars[j].position.y;
             double dz = galaxy.stars[i].position.z - galaxy.stars[j].position.z;
-            double dist = sqrt(dx * dx + dy * dy + dz * dz);
-            double preff = pow(dist,2) + pow(EPS,2);
-            double pref = -G/pow(preff,1.5)*galaxy.stars[j].mass;
+            double dist = sqrt(dx * dx + dy * dy + dz * dz + EPS);
+          //  double preff = pow(dist,2) + pow(EPS,2);
+            //double pref = -G/pow(preff,1.5)*galaxy.stars[j].mass;
+            double pref = -G/pow(dist,3)*galaxy.stars[j].mass;
             galaxy.stars[i].acceleration.x += pref * dx;
             galaxy.stars[i].acceleration.y += pref * dy;
             galaxy.stars[i].acceleration.z += pref * dz;
@@ -249,9 +251,10 @@ void gravity_calculate_acceleration(int start, int end) {
             double dx2 = galaxy.stars[i].position.x - galaxy2.stars[j].position.x;
             double dy2 = galaxy.stars[i].position.y - galaxy2.stars[j].position.y;
             double dz2 = galaxy.stars[i].position.z - galaxy2.stars[j].position.z;
-            double dist2 = sqrt(dx2 * dx2 + dy2 * dy2 + dz2 * dz2);
-            double preff2 = pow(dist2,2) + pow(EPS,2);
-            double pref2 = -G/pow(preff2,1.5)*galaxy.stars[j].mass;
+            double dist2 = sqrt(dx2 * dx2 + dy2 * dy2 + dz2 * dz2+EPS);
+          //  double preff2 = pow(dist2,2) + pow(EPS,2);
+            //double pref2 = -G/pow(preff2,1.5)*galaxy.stars[j].mass;
+            double pref2 = -G/pow(dist2,3)*galaxy.stars[j].mass;
             galaxy.stars[i].acceleration.x += pref2 * dx2;
             galaxy.stars[i].acceleration.y += pref2 * dy2;
             galaxy.stars[i].acceleration.z += pref2 * dz2;

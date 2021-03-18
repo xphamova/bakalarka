@@ -47,7 +47,7 @@ GALAXY create_galaxy(float heightMagnitude, float heightFrequency, int numStar, 
         galaxy.stars[i].acceleration.y = 0;
         galaxy.stars[i].acceleration.z = 0;
 
-        galaxy.stars[i].mass = 1e27;
+        galaxy.stars[i].mass = 1e26;
     }
     return galaxy;
 }
