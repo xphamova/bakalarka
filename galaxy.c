@@ -58,16 +58,16 @@ VECTOR star_position(double galaxy_center_x, double galaxy_center_y, double gala
     VECTOR v;
     int numArms = 2;
     double arm_separation_distance = 2 * 3.14 / numArms;
-    float max_arm_offset = 1.0f;
-    double rotationFactor = 10.0;
+    float max_arm_offset = 1.5f;
+    double rotationFactor = 7.0;
 
     // nastavenie vzdialenosti od stredu
-    double distance = rand_float_from_to(0, 0.3f);
+    double distance = rand_float_from_to(0, 0.7f);
     distance = pow(distance, 1);
 
     // nastavenie uhla
     double angle = rand_float_from_to(0, 1) * 2 * M_PI;
-    double arm_offset = rand_float_from_to(0, 0.3f) * max_arm_offset;
+    double arm_offset = rand_float_from_to(0, 0.7f) * max_arm_offset;
 
     arm_offset = arm_offset - max_arm_offset / 2;
     arm_offset = arm_offset * (1 / distance);
