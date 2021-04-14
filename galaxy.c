@@ -15,7 +15,9 @@ typedef struct {
 } STAR;
 
 typedef struct {
-    STAR stars[1000];
+    STAR stars[2000];
+    VECTOR center;
+    double mass;
 } GALAXY;
 
 VECTOR star_position(double, double, double);
@@ -26,6 +28,9 @@ GALAXY create_galaxy(float heightMagnitude, float heightFrequency, int numStar, 
 
     GALAXY galaxy;
 
+    galaxy.center.x = galaxy_center.x;
+    galaxy.center.y = galaxy_center.y;
+    galaxy_center.z = galaxy_center.z;
     for (int i = 0; i < numStar; i++) {
         //generovanie pozicie hviezdy, vrati vektor s hodnotami x,y,z
         VECTOR v = star_position(galaxy_center.x, galaxy_center.y, galaxy_center.z);
@@ -48,7 +53,10 @@ GALAXY create_galaxy(float heightMagnitude, float heightFrequency, int numStar, 
         galaxy.stars[i].acceleration.z = 0;
 
         galaxy.stars[i].mass = 1e26;
+        galaxy.mass = galaxy.stars[i].mass;
     }
+
+    galaxy.mass = galaxy.mass * 100;
     return galaxy;
 }
 
