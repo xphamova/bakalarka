@@ -44,7 +44,7 @@ GALAXY create_galaxy(float heightMagnitude, float heightFrequency, int numStar, 
         galaxy.stars[i].position.z = v.z * size - size;
 
         //nastavenie pociatocnej rychlosti
-        galaxy.stars[i].velocity.x = velocity.x;
+        galaxy.stars[i].velocity.x = velocity.x ;
         galaxy.stars[i].velocity.y = velocity.y;
         galaxy.stars[i].velocity.z = velocity.z;
 
@@ -52,7 +52,7 @@ GALAXY create_galaxy(float heightMagnitude, float heightFrequency, int numStar, 
         galaxy.stars[i].acceleration.y = 0;
         galaxy.stars[i].acceleration.z = 0;
 
-        galaxy.stars[i].mass = 1e26;
+        galaxy.stars[i].mass = 1e28;
         galaxy.mass = galaxy.stars[i].mass;
     }
 
