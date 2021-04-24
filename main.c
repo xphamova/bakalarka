@@ -184,7 +184,7 @@ void* calculate_galaxy1(void* param){
         galaxy.stars[i].velocity.y += time_step * galaxy.stars[i].acceleration.y;
         galaxy.stars[i].velocity.z += time_step * galaxy.stars[i].acceleration.z;
 
-        cal_velocity(i);
+      //  cal_velocity(i);
         galaxy.stars[i].position.x += half_time_step * galaxy.stars[i].velocity.x;
         galaxy.stars[i].position.y += half_time_step * galaxy.stars[i].velocity.y;
         galaxy.stars[i].position.z += half_time_step * galaxy.stars[i].velocity.z;
@@ -310,10 +310,16 @@ void cal_velocity(int i){
     double G = 6.6742367e-11; // m^3.kg^-1.s^-2
     double velocity;
     double distance;
-    double dx = galaxy.stars[i].position.x-galaxy.center.x;
-    double dy = galaxy.stars[i].position.y-galaxy.center.y;
-    double dz = galaxy.stars[i].position.z-galaxy.center.z;
-    distance = sqrt(dx*dx+dy*dy+dz*dz);
+//    double dx = galaxy.stars[i].position.x-galaxy.center.x;
+//    double dy = galaxy.stars[i].position.y-galaxy.center.y;
+//    double dz = galaxy.stars[i].position.z-galaxy.center.z;
+
+    double dx = galaxy.center.x- galaxy.stars[i].position.x;
+    double dy = galaxy.center.y - galaxy.stars[i].position.y;
+    double dz = galaxy.center.z-galaxy.stars[i].position.z;
+
+    double dis = dx*dx+dy*dy+dz*dz;
+    distance = sqrt(dis);
     velocity = sqrt((G*galaxy.stars[i].mass)/distance);
     galaxy.stars[i].velocity.x += velocity;
     galaxy.stars[i].velocity.y += velocity;
