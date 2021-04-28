@@ -23,7 +23,9 @@ void* calculate_galaxy1(void*);
 
 void start_cal();
 
-void cal_velocity(int );
+void cal_velocity(int);
+
+VECTOR norm_vector(VECTOR);
 
 
 #define num_star 2000
@@ -42,8 +44,8 @@ int main(int argc, char *argv[]) {
     //prva galaxia
     VECTOR galaxy_center, velocity;
     galaxy_center.x = 0;
-    galaxy_center.y = 1;
-    galaxy_center.z = 1;
+    galaxy_center.y = 0;
+    galaxy_center.z = 0;
 
    //velocity.x = 15 * 1e5;
     velocity.x = 0;
@@ -126,11 +128,11 @@ void myDraw() {
     for (int i = 0; i < num_star; i++) {
         glVertex3f(galaxy.stars[i].position.x, galaxy.stars[i].position.y, galaxy.stars[i].position.z);
     }
-//    glColor3f(1.0, 0.2, 0.2);
+    glColor3f(1.0, 0.2, 0.2);
 //    for (int i = 0; i < num_star; i++) {
 //        glVertex3f(galaxy2.stars[i].position.x, galaxy2.stars[i].position.y, galaxy2.stars[i].position.z);
 //    }
-
+    glVertex3f(0, 0, 0);
     glEnd();
     glutSwapBuffers();
 }
@@ -176,7 +178,7 @@ void* calculate_galaxy1(void* param){
         galaxy.stars[i].position.z += half_time_step * galaxy.stars[i].velocity.z;
     }
 
-    gravity_calculate_acceleration(start,end);
+    //gravity_calculate_acceleration(start,end);
 
     for(int i = start; i<end; i++){
 
@@ -184,7 +186,7 @@ void* calculate_galaxy1(void* param){
         galaxy.stars[i].velocity.y += time_step * galaxy.stars[i].acceleration.y;
         galaxy.stars[i].velocity.z += time_step * galaxy.stars[i].acceleration.z;
 
-      //  cal_velocity(i);
+        cal_velocity(i);
         galaxy.stars[i].position.x += half_time_step * galaxy.stars[i].velocity.x;
         galaxy.stars[i].position.y += half_time_step * galaxy.stars[i].velocity.y;
         galaxy.stars[i].position.z += half_time_step * galaxy.stars[i].velocity.z;
@@ -308,21 +310,39 @@ void gravity_calculate_acceleration2(int start, int end) {
 
 void cal_velocity(int i){
     double G = 6.6742367e-11; // m^3.kg^-1.s^-2
-    double velocity;
+    double orbital_vel;
     double distance;
+    VECTOR v,norm_v;
 //    double dx = galaxy.stars[i].position.x-galaxy.center.x;
 //    double dy = galaxy.stars[i].position.y-galaxy.center.y;
 //    double dz = galaxy.stars[i].position.z-galaxy.center.z;
 
-    double dx = galaxy.center.x- galaxy.stars[i].position.x;
-    double dy = galaxy.center.y - galaxy.stars[i].position.y;
-    double dz = galaxy.center.z-galaxy.stars[i].position.z;
+    v.x = galaxy.center.x - galaxy.stars[i].position.x;
+    v.y = galaxy.center.y - galaxy.stars[i].position.y;
+    v.z = galaxy.center.z - galaxy.stars[i].position.z;
 
-    double dis = dx*dx+dy*dy+dz*dz;
+    double dis = v.x*v.x+v.y*v.y+v.z*v.z;
     distance = sqrt(dis);
-    velocity = sqrt((G*galaxy.stars[i].mass)/distance);
-    galaxy.stars[i].velocity.x += velocity;
-    galaxy.stars[i].velocity.y += velocity;
-    galaxy.stars[i].velocity.z += velocity;
+    orbital_vel = sqrt(G*galaxy.stars[i].mass/distance);
+    norm_v = norm_vector(v);
+    galaxy.stars[i].velocity.x += (norm_v.x*orbital_vel)*time_step;
+    galaxy.stars[i].velocity.y += (norm_v.y*orbital_vel)*time_step;
+    galaxy.stars[i].velocity.z += (norm_v.z*orbital_vel)*time_step;
 
+}
+
+VECTOR norm_vector(VECTOR vector){
+    VECTOR vector1;
+    double magnitude = Vector_magnitude(vector);
+    double smag = sqrt(magnitude);
+    if(magnitude>0){
+        vector1.x = vector.x/smag;
+        vector1.y = vector.y/smag;
+        vector1.z = vector.z/smag;
+    } else {
+        vector1.x = 0;
+        vector1.y = 0;
+        vector1.z = 0;
+    }
+    return vector1;
 }

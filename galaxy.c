@@ -30,7 +30,7 @@ GALAXY create_galaxy(float heightMagnitude, float heightFrequency, int numStar, 
 
     galaxy.center.x = galaxy_center.x;
     galaxy.center.y = galaxy_center.y;
-    galaxy_center.z = galaxy_center.z;
+    galaxy.center.z = galaxy_center.z;
     for (int i = 0; i < numStar; i++) {
         //generovanie pozicie hviezdy, vrati vektor s hodnotami x,y,z
         VECTOR v = star_position(galaxy_center.x, galaxy_center.y, galaxy_center.z);
@@ -39,9 +39,14 @@ GALAXY create_galaxy(float heightMagnitude, float heightFrequency, int numStar, 
 
         //nacitanie pozicie hviezdy
         double size = 1e7;
-        galaxy.stars[i].position.x = v.x * size - size;
-        galaxy.stars[i].position.y = v.y * size - size;
-        galaxy.stars[i].position.z = v.z * size - size;
+        galaxy.stars[i].position.x = (v.x * size - size) ;
+        galaxy.stars[i].position.y = (v.y * size - size) ;
+        galaxy.stars[i].position.z = (v.z * size - size) ;
+        //pusunutie na center
+
+        galaxy.stars[i].position.x +=size;
+        galaxy.stars[i].position.y +=size;
+        galaxy.stars[i].position.z +=size;
 
         //nastavenie pociatocnej rychlosti
         galaxy.stars[i].velocity.x = velocity.x ;
@@ -89,9 +94,9 @@ VECTOR star_position(double galaxy_center_x, double galaxy_center_y, double gala
 
     angle = (int) (angle / arm_separation_distance) * arm_separation_distance + arm_offset + rotation;
 
-    v.x = (cos(angle) * distance) + galaxy_center_x;
-    v.z = (sin(angle) * distance) + galaxy_center_z;
-    v.y = 0 + galaxy_center_y;
+    v.x = (cos(angle) * distance) ;
+    v.z = (sin(angle) * distance) ;
+    v.y = 0 ;
 
     return v;
 }
