@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <pthread.h>
+#include <unistd.h>
 
 void reshape(int, int);
 
@@ -24,9 +25,6 @@ void* calculate_galaxy1(void*);
 void start_cal();
 
 void cal_velocity(int);
-
-VECTOR norm_vector(VECTOR);
-
 
 #define num_star 2000
 
@@ -133,6 +131,7 @@ void myDraw() {
 //        glVertex3f(galaxy2.stars[i].position.x, galaxy2.stars[i].position.y, galaxy2.stars[i].position.z);
 //    }
     glVertex3f(0, 0, 0);
+    sleep(1);
     glEnd();
     glutSwapBuffers();
 }
@@ -178,7 +177,7 @@ void* calculate_galaxy1(void* param){
         galaxy.stars[i].position.z += half_time_step * galaxy.stars[i].velocity.z;
     }
 
-    //gravity_calculate_acceleration(start,end);
+    gravity_calculate_acceleration(start,end);
 
     for(int i = start; i<end; i++){
 
@@ -186,7 +185,7 @@ void* calculate_galaxy1(void* param){
         galaxy.stars[i].velocity.y += time_step * galaxy.stars[i].acceleration.y;
         galaxy.stars[i].velocity.z += time_step * galaxy.stars[i].acceleration.z;
 
-        cal_velocity(i);
+       // cal_velocity(i);
         galaxy.stars[i].position.x += half_time_step * galaxy.stars[i].velocity.x;
         galaxy.stars[i].position.y += half_time_step * galaxy.stars[i].velocity.y;
         galaxy.stars[i].position.z += half_time_step * galaxy.stars[i].velocity.z;
@@ -323,7 +322,7 @@ void cal_velocity(int i){
 
     double dis = v.x*v.x+v.y*v.y+v.z*v.z;
     distance = sqrt(dis);
-    orbital_vel = sqrt(G*galaxy.stars[i].mass/distance);
+    orbital_vel = G*galaxy.mass/distance/distance;
     norm_v = norm_vector(v);
     galaxy.stars[i].velocity.x += (norm_v.x*orbital_vel)*time_step;
     galaxy.stars[i].velocity.y += (norm_v.y*orbital_vel)*time_step;
@@ -331,18 +330,4 @@ void cal_velocity(int i){
 
 }
 
-VECTOR norm_vector(VECTOR vector){
-    VECTOR vector1;
-    double magnitude = Vector_magnitude(vector);
-    double smag = sqrt(magnitude);
-    if(magnitude>0){
-        vector1.x = vector.x/smag;
-        vector1.y = vector.y/smag;
-        vector1.z = vector.z/smag;
-    } else {
-        vector1.x = 0;
-        vector1.y = 0;
-        vector1.z = 0;
-    }
-    return vector1;
-}
+

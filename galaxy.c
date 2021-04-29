@@ -3,6 +3,7 @@
 
 float rand_float_from_to(float, float);
 
+
 typedef struct {
     double x, y, z;
 } VECTOR;
@@ -23,6 +24,12 @@ typedef struct {
 VECTOR star_position(double, double, double);
 
 double Vector_magnitude(VECTOR);
+
+VECTOR norm_vector(VECTOR);
+
+VECTOR cross_vector(VECTOR, VECTOR);
+
+double orbital_vel(double, double);
 
 GALAXY create_galaxy(float heightMagnitude, float heightFrequency, int numStar, VECTOR galaxy_center, VECTOR velocity) {
 
@@ -47,18 +54,37 @@ GALAXY create_galaxy(float heightMagnitude, float heightFrequency, int numStar, 
         galaxy.stars[i].position.x +=size;
         galaxy.stars[i].position.y +=size;
         galaxy.stars[i].position.z +=size;
-
+        galaxy.stars[i].mass = 1e24;
+        galaxy.mass = galaxy.stars[i].mass;
         //nastavenie pociatocnej rychlosti
-        galaxy.stars[i].velocity.x = velocity.x ;
-        galaxy.stars[i].velocity.y = velocity.y;
-        galaxy.stars[i].velocity.z = velocity.z;
+        VECTOR up;
+        up.x=0;
+        up.y=1;
+        up.z=0;
+        VECTOR vec = cross_vector(galaxy.stars[i].position,up);
+        VECTOR vec1 = norm_vector(vec);
+        VECTOR relative_vel;
+        double orbital_velocity;
+        //vzdialenost od stredu
+        VECTOR vz;
+        vz.x = galaxy.center.x - galaxy.stars[i].position.x;
+        vz.y = galaxy.center.y - galaxy.stars[i].position.y;
+        vz.z = galaxy.center.z - galaxy.stars[i].position.z;
+        orbital_velocity = orbital_vel(galaxy.stars[i].mass,Vector_magnitude(galaxy.stars[i].position));
+        relative_vel.x = (vec1.x * orbital_velocity)*0.5;
+        relative_vel.y = (vec1.y * orbital_velocity)*0.5;
+        relative_vel.z = (vec1.z * orbital_velocity)*0.5;
+
+
+        galaxy.stars[i].velocity.x = velocity.x + relative_vel.x;
+        galaxy.stars[i].velocity.y = velocity.y + relative_vel.y;
+        galaxy.stars[i].velocity.z = velocity.z + relative_vel.z;
 
         galaxy.stars[i].acceleration.x = 0;
         galaxy.stars[i].acceleration.y = 0;
         galaxy.stars[i].acceleration.z = 0;
 
-        galaxy.stars[i].mass = 1e28;
-        galaxy.mass = galaxy.stars[i].mass;
+
     }
 
     galaxy.mass = galaxy.mass * 100;
@@ -110,4 +136,34 @@ float rand_float_from_to(float min, float max) {
 double Vector_magnitude(VECTOR p) {
     double w = sqrt(p.x * p.x + p.y * p.y + p.z * p.z);
     return w;
+}
+
+VECTOR norm_vector(VECTOR vector){
+    VECTOR vector1;
+    double magnitude = Vector_magnitude(vector);
+    double smag = sqrt(magnitude);
+    if(magnitude>0){
+        vector1.x = vector.x/smag;
+        vector1.y = vector.y/smag;
+        vector1.z = vector.z/smag;
+    } else {
+        vector1.x = 0;
+        vector1.y = 0;
+        vector1.z = 0;
+    }
+    return vector1;
+}
+
+VECTOR cross_vector(VECTOR first, VECTOR second){
+    VECTOR out_vector;
+    out_vector.x = first.y * second.z - first.z * second.y;
+    out_vector.y = first.z * second.x - first.x * second.z;
+    out_vector.z = first.x * second.y - first.y * second.x;
+
+    return out_vector;
+}
+
+double orbital_vel(double mass,double radius){
+    double G = 6.6742367e-11; // m^3.kg^-1.s^-2
+    return sqrt(G*mass/radius);
 }
