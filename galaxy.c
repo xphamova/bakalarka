@@ -3,7 +3,6 @@
 
 float rand_float_from_to(float, float);
 
-
 typedef struct {
     double x, y, z;
 } VECTOR;
@@ -46,14 +45,9 @@ GALAXY create_galaxy(float heightMagnitude, float heightFrequency, int numStar, 
 
         //nacitanie pozicie hviezdy
         double size = 1e7;
-        galaxy.stars[i].position.x = (v.x * size - size) ;
-        galaxy.stars[i].position.y = (v.y * size - size) ;
-        galaxy.stars[i].position.z = (v.z * size - size) ;
-        //pusunutie na center
-
-        galaxy.stars[i].position.x +=size;
-        galaxy.stars[i].position.y +=size;
-        galaxy.stars[i].position.z +=size;
+        galaxy.stars[i].position.x = (v.x * size) ;
+        galaxy.stars[i].position.y = (v.y * size) ;
+        galaxy.stars[i].position.z = (v.z * size) ;
         galaxy.stars[i].mass = 1e24;
         galaxy.mass = galaxy.stars[i].mass;
         //nastavenie pociatocnej rychlosti
@@ -61,20 +55,20 @@ GALAXY create_galaxy(float heightMagnitude, float heightFrequency, int numStar, 
         up.x=0;
         up.y=1;
         up.z=0;
+//        VECTOR vz;
+//        vz.x = galaxy.center.x - galaxy.stars[i].position.x;
+//        vz.y = galaxy.center.y - galaxy.stars[i].position.y;
+//        vz.z = galaxy.center.z - galaxy.stars[i].position.z;
+
         VECTOR vec = cross_vector(galaxy.stars[i].position,up);
         VECTOR vec1 = norm_vector(vec);
         VECTOR relative_vel;
         double orbital_velocity;
-        //vzdialenost od stredu
-        VECTOR vz;
-        vz.x = galaxy.center.x - galaxy.stars[i].position.x;
-        vz.y = galaxy.center.y - galaxy.stars[i].position.y;
-        vz.z = galaxy.center.z - galaxy.stars[i].position.z;
-        orbital_velocity = orbital_vel(galaxy.stars[i].mass,Vector_magnitude(galaxy.stars[i].position));
-        relative_vel.x = (vec1.x * orbital_velocity)*0.5;
-        relative_vel.y = (vec1.y * orbital_velocity)*0.5;
-        relative_vel.z = (vec1.z * orbital_velocity)*0.5;
 
+        orbital_velocity = orbital_vel(galaxy.stars[i].mass,Vector_magnitude(galaxy.stars[i].position));
+        relative_vel.x = (vec1.x * orbital_velocity);
+        relative_vel.y = (vec1.y * orbital_velocity);
+        relative_vel.z = (vec1.z * orbital_velocity);
 
         galaxy.stars[i].velocity.x = velocity.x + relative_vel.x;
         galaxy.stars[i].velocity.y = velocity.y + relative_vel.y;
@@ -87,7 +81,7 @@ GALAXY create_galaxy(float heightMagnitude, float heightFrequency, int numStar, 
 
     }
 
-    galaxy.mass = galaxy.mass * 100;
+    galaxy.mass = galaxy.mass * 2000;
     return galaxy;
 }
 
@@ -101,12 +95,12 @@ VECTOR star_position(double galaxy_center_x, double galaxy_center_y, double gala
     double rotationFactor = 7.0;
 
     // nastavenie vzdialenosti od stredu
-    double distance = rand_float_from_to(0, 0.7f);
+    double distance = rand_float_from_to(0, 0.5f);
     distance = pow(distance, 1);
 
     // nastavenie uhla
     double angle = rand_float_from_to(0, 1) * 2 * M_PI;
-    double arm_offset = rand_float_from_to(0, 0.7f) * max_arm_offset;
+    double arm_offset = rand_float_from_to(0, 0.5f) * max_arm_offset;
 
     arm_offset = arm_offset - max_arm_offset / 2;
     arm_offset = arm_offset * (1 / distance);
@@ -120,13 +114,12 @@ VECTOR star_position(double galaxy_center_x, double galaxy_center_y, double gala
 
     angle = (int) (angle / arm_separation_distance) * arm_separation_distance + arm_offset + rotation;
 
-    v.x = (cos(angle) * distance) ;
-    v.z = (sin(angle) * distance) ;
-    v.y = 0 ;
+    v.x = (cos(angle) * distance) + galaxy_center_x;
+    v.z = (sin(angle) * distance) + galaxy_center_z;
+    v.y = 0 + galaxy_center_y;
 
     return v;
 }
-
 
 float rand_float_from_to(float min, float max) {
     float result = (float) rand() / (float) (RAND_MAX) * (max - min) + min;
@@ -141,7 +134,7 @@ double Vector_magnitude(VECTOR p) {
 VECTOR norm_vector(VECTOR vector){
     VECTOR vector1;
     double magnitude = Vector_magnitude(vector);
-    double smag = sqrt(magnitude);
+    double smag = magnitude;
     if(magnitude>0){
         vector1.x = vector.x/smag;
         vector1.y = vector.y/smag;
