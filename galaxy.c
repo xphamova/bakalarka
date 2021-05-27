@@ -33,10 +33,10 @@ double orbital_vel(double, double);
 GALAXY create_galaxy(float heightMagnitude, float heightFrequency, int numStar, VECTOR galaxy_center, VECTOR velocity) {
 
     GALAXY galaxy;
-
-    galaxy.center.x = galaxy_center.x;
-    galaxy.center.y = galaxy_center.y;
-    galaxy.center.z = galaxy_center.z;
+    double size = 1e7;
+    galaxy.center.x = galaxy_center.x*size;
+    galaxy.center.y = galaxy_center.y*size;
+    galaxy.center.z = galaxy_center.z*size;
     for (int i = 0; i < numStar; i++) {
         //generovanie pozicie hviezdy, vrati vektor s hodnotami x,y,z
         VECTOR v = star_position(galaxy_center.x, galaxy_center.y, galaxy_center.z);
@@ -44,48 +44,42 @@ GALAXY create_galaxy(float heightMagnitude, float heightFrequency, int numStar, 
         v.y -= heightMagnitude * sin(Vector_magnitude(v) * heightFrequency);
 
         //nacitanie pozicie hviezdy
-        double size = 1e7;
+
         galaxy.stars[i].position.x = (v.x * size) ;
         galaxy.stars[i].position.y = (v.y * size) ;
         galaxy.stars[i].position.z = (v.z * size) ;
-        galaxy.stars[i].mass = 1e27;
-        galaxy.mass = galaxy.stars[i].mass;
+        galaxy.stars[i].mass = 1e28;
+        galaxy.mass += galaxy.stars[i].mass;
         //nastavenie pociatocnej rychlosti
         VECTOR up;
-        up.x=0;
-        up.y=1;
-        up.z=0;
+        up.x=galaxy_center.x;
+        up.y=1.0*size;
+        up.z=galaxy_center.z;
         VECTOR vz;
-        vz.x = galaxy.center.x - galaxy.stars[i].position.x;
-        vz.y = galaxy.center.y - galaxy.stars[i].position.y;
-        vz.z = galaxy.center.z - galaxy.stars[i].position.z;
+        vz.x = galaxy.center.x - galaxy.stars[i].position.x ;
+        vz.y = galaxy.center.y - galaxy.stars[i].position.y  ;
+        vz.z = galaxy.center.z - galaxy.stars[i].position.z  ;
 
-        VECTOR vec = cross_vector(galaxy.stars[i].position,up);
+        VECTOR vec = cross_vector(vz,up);
         VECTOR vec1 = norm_vector(vec);
         VECTOR relative_vel;
         double orbital_velocity;
 
-        orbital_velocity = orbital_vel(galaxy.stars[i].mass,Vector_magnitude(galaxy.stars[i].position));
-        relative_vel.x = (vec1.x * orbital_velocity)*10;
-        relative_vel.y = (vec1.y * orbital_velocity)*10;
-        relative_vel.z = (vec1.z * orbital_velocity)*10;
+        orbital_velocity = orbital_vel(galaxy.stars[i].mass,Vector_magnitude(vz));
+        relative_vel.x = (vec1.x * orbital_velocity)*13;
+        relative_vel.y = (vec1.y * orbital_velocity)*13;
+        relative_vel.z = (vec1.z * orbital_velocity)*13;
 
-//        galaxy.stars[i].velocity.x = velocity.x + relative_vel.x;
-//        galaxy.stars[i].velocity.y = velocity.y + relative_vel.y;
-//        galaxy.stars[i].velocity.z = velocity.z + relative_vel.z;
-
-        galaxy.stars[i].velocity.x = velocity.x;
-        galaxy.stars[i].velocity.y = velocity.y;
-        galaxy.stars[i].velocity.z = velocity.z;
+        galaxy.stars[i].velocity.x = velocity.x + relative_vel.x;
+        galaxy.stars[i].velocity.y = velocity.y + relative_vel.y;
+        galaxy.stars[i].velocity.z = velocity.z + relative_vel.z;
 
         galaxy.stars[i].acceleration.x = 0;
         galaxy.stars[i].acceleration.y = 0;
         galaxy.stars[i].acceleration.z = 0;
 
-
     }
 
-    galaxy.mass = galaxy.mass * 2000;
     return galaxy;
 }
 
@@ -162,5 +156,5 @@ VECTOR cross_vector(VECTOR first, VECTOR second){
 
 double orbital_vel(double mass,double radius){
     double G = 6.6742367e-11; // m^3.kg^-1.s^-2
-    return sqrt(G*mass/radius);
+    return sqrt((G*mass)/radius);
 }
