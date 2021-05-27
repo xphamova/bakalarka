@@ -336,6 +336,7 @@ void start_thread(){
     BARNESHUT *BH = BarnesHut_creat(-10,-10,-10,10,10,10);
     for (int i = 0;i<num_star;i++){
         BARNESHUT_add(BH,galaxy.stars[i].position,galaxy.stars[i].mass);
+        BARNESHUT_add(BH,galaxy2.stars[i].position,galaxy2.stars[i].mass);
     }
     // vyratame COM kazdeho uzla
     Barneshut_cal_tree( BH->root_node);
@@ -396,7 +397,7 @@ void start_thread(){
         range2[i].position.z = 0;
     }
     int r1 = 0, r2=0, r3 = 0, r4 = 0;
-
+//prerobit
     for(int i = 0; i<num_star; i++){
         if (i<number_of_star_in_thread){
             range1[r1] = galaxy.stars[i];
@@ -433,6 +434,7 @@ void start_thread(){
     pthread_join(tid4, (void **) &receive_range4);
 
     r1 = 0; r2=0; r3=0; r4=0;
+    //prerobit
     for(int i = 0; i<num_star; i++){
         if (i<number_of_star_in_thread){
             galaxy.stars[i]  = receive_range1[r1] ;
