@@ -7,6 +7,8 @@
 #include <time.h>
 #include <pthread.h>
 #include <unistd.h>
+#include "bh.c"
+#include <sys/shm.h>
 
 void reshape(int, int);
 
@@ -22,7 +24,15 @@ void *calculate_galaxy2(void*);
 
 void* calculate_galaxy1(void*);
 
+void *bh_start();
+
 void start_cal();
+
+STAR update_position(STAR);
+
+STAR acceleration(STAR);
+
+STAR second_update(STAR);
 
 #define num_star 2000
 
@@ -319,6 +329,221 @@ void gravity_calculate_acceleration2(int start, int end) {
     }
 
 }
+void start_thread(){
+
+    //vytvorime strom pre vsetky hviezdy
+    //   BARNESHUT *BH = BarnesHut_creat(-960,-540,-500,960,540,500);
+    BARNESHUT *BH = BarnesHut_creat(-10,-10,-10,10,10,10);
+    for (int i = 0;i<num_star;i++){
+        BARNESHUT_add(BH,galaxy.stars[i].position,galaxy.stars[i].mass);
+    }
+    // vyratame COM kazdeho uzla
+    Barneshut_cal_tree( BH->root_node);
+
+    //zapiseme tieto veci do zdielanej pamate
+    //shared memory
+    key_t key = 26;
+    //osetrenie na -1
+    int shmid = shmget(key, sizeof(BARNESHUT), 0666 | IPC_CREAT);//identifikator
+    //osetrenie na -1
+    BARNESHUT *shm = (BARNESHUT *) shmat(shmid, NULL, 0);//prepajanie
 
 
+    BARNESHUT *s;
+    s = shm;
+    *s = *BH;
+
+    /* detach from the segment: */
+    if (shmdt(shm) == -1) {
+        perror("shmdt");
+        exit(1);
+    }
+
+    //podelienie hviezd vlaknam
+    //vyriesit problem ak cislo nie je delitelne 4
+    int number_of_star_in_thread = num_star/4;
+    STAR range1[number_of_star_in_thread];
+    STAR range2[number_of_star_in_thread],range3[number_of_star_in_thread],range4[number_of_star_in_thread];
+
+    for (int i=0; i<number_of_star_in_thread;i++) {
+        range1[i].mass = 0;
+        range1[i].force.x = 0;
+        range1[i].force.y = 0;
+        range1[i].force.z = 0;
+        range1[i].acceleration.x = 0;
+        range1[i].acceleration.y = 0;
+        range1[i].acceleration.z = 0;
+        range1[i].velocity.x = 0;
+        range1[i].velocity.y = 0;
+        range1[i].velocity.z = 0;
+        range1[i].position.x = 0;
+        range1[i].position.y = 0;
+        range1[i].position.z = 0;
+    }
+    for (int i=0; i<number_of_star_in_thread;i++) {
+        range2[i].mass = 0;
+        range2[i].force.x = 0;
+        range2[i].force.y = 0;
+        range2[i].force.z = 0;
+        range2[i].acceleration.x = 0;
+        range2[i].acceleration.y = 0;
+        range2[i].acceleration.z = 0;
+        range2[i].velocity.x = 0;
+        range2[i].velocity.y = 0;
+        range2[i].velocity.z = 0;
+        range2[i].position.x = 0;
+        range2[i].position.y = 0;
+        range2[i].position.z = 0;
+    }
+    int r1 = 0, r2=0, r3 = 0, r4 = 0;
+
+    for(int i = 0; i<num_star; i++){
+        if (i<number_of_star_in_thread){
+            range1[r1] = galaxy.stars[i];
+            r1++;
+        }
+        if (i>=number_of_star_in_thread && i<(2*number_of_star_in_thread)){
+            range2[r2] = galaxy.stars[i];
+            r2++;
+        }
+        if (i >= (2*number_of_star_in_thread) && i < (3*number_of_star_in_thread)){
+            range3[r3] = galaxy.stars[i];
+            r3++;
+        }
+        if (i >= (3*number_of_star_in_thread)) {
+            range4[r4] = galaxy.stars[i];
+            r4++;
+        }
+    }
+
+    void *send_range1,*send_range2,*send_range3,*send_range4;
+    STAR *receive_range1,*receive_range2,*receive_range3,*receive_range4;
+    send_range1 = &range1;
+    send_range2 = &range2;
+    send_range3 = &range3;
+    send_range4 = &range4;
+    pthread_t tid1, tid2,tid3,tid4;
+    pthread_create(&tid1, NULL, bh_start, send_range1);//start thread
+    pthread_create(&tid2, NULL, bh_start, (void *) send_range2);
+    pthread_create(&tid3, NULL, bh_start, (void *) send_range3);
+    pthread_create(&tid4, NULL, bh_start, (void *) send_range4);
+    pthread_join(tid1, (void **) &receive_range1);
+    pthread_join(tid2, (void **) &receive_range2);
+    pthread_join(tid3, (void **) &receive_range3);
+    pthread_join(tid4, (void **) &receive_range4);
+
+    r1 = 0; r2=0; r3=0; r4=0;
+    for(int i = 0; i<num_star; i++){
+        if (i<number_of_star_in_thread){
+            galaxy.stars[i]  = receive_range1[r1] ;
+            r1++;
+        }
+        if (i>= number_of_star_in_thread && i<(2*number_of_star_in_thread)){
+            galaxy.stars[i] = receive_range2[r2] ;
+            r2++;
+        }
+        if (i >= (2*number_of_star_in_thread) && i < (3*number_of_star_in_thread)){
+            galaxy.stars[i] = receive_range3[r3];
+            r3++;
+        }
+        if (i >= (3*number_of_star_in_thread)) {
+            galaxy.stars[i] = receive_range4[r4];
+            r4++;
+        }
+    }
+
+    free_node((OCTNODE *) BH->root_node);
+    free(BH);
+    BH = NULL;
+}
+
+void *bh_start(void *input){
+
+    STAR range[num_star/4];
+    STAR *ran = (STAR *)input;
+    int size = 0;
+
+    for (int i = 0; i< num_star/4; i++){
+        range[i] = *(ran + i);
+        if(range[i].mass != 0){
+            size++;
+        }
+    }
+
+    //ziskanie stromu z pamate
+    //shared memory
+    key_t key = 26;
+    BARNESHUT *BH;
+    int shmid = shmget(key, sizeof(BARNESHUT), 0666);
+    BARNESHUT *shm;
+    shm = (BARNESHUT *) shmat(shmid, NULL, 0);
+    BH = shm;
+
+
+
+    for(int i = 0; i < num_star/4; i++){
+        //kick : pos = pos + half_time_step * vel
+        range[i] = update_position(range[i]);
+        calculate_force( BH->root_node, &range[i]);
+        //drift : acc[i] = range.force[i]/range.mass[i]
+        range[i] = acceleration(range[i]);
+        // kick : vel =vel + acc[i]* timestep; pos = half_time_step * vel
+        range[i] = second_update(range[i]);
+    }
+
+    STAR* output;
+
+    //create dynamic memory
+    output = (STAR *) malloc(size * sizeof(STAR));
+    if (output == NULL) {
+        printf("Memory not allocated.\n");
+        exit(0);
+    }
+
+    //write to dynamic memory
+    for (int i = 0; i < size; i++) {
+        output[i] = range[i];
+    }
+
+    /* detach from the segment: */
+    if (shmdt(shm) == -1) {
+        perror("shmdt");
+        exit(1);
+    }
+
+    return (STAR*) output;
+
+}
+
+//LEAPFROG------------------------------------------------------------------------------------------------
+
+
+STAR update_position( STAR star){
+
+    star.position.x += half_time_step*star.velocity.x;
+    star.position.y += half_time_step*star.velocity.x;
+    star.position.z += half_time_step*star.velocity.z;
+
+    return star;
+}
+
+STAR acceleration(STAR star){
+    star.acceleration.x = star.force.x/star.mass;
+    star.acceleration.y = star.force.y/star.mass;
+    star.acceleration.z = star.force.z/star.mass;
+    return star;
+}
+
+STAR second_update(STAR star){
+
+    star.velocity.x += time_step * star.acceleration.x;
+    star.velocity.y += time_step * star.acceleration.y;
+    star.velocity.z += time_step * star.acceleration.z;
+
+    star.position.x += half_time_step * star.velocity.x;
+    star.position.y += half_time_step * star.velocity.y;
+    star.position.z += half_time_step * star.velocity.z;
+    return star;
+
+}
 
