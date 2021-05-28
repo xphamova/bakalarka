@@ -1,6 +1,6 @@
 #include <GL/glut.h>
 #include <GLFW/glfw3.h>
-#include "galaxy.c"
+//#include "galaxy.c"
 #include "time.h"
 #include "stdio.h"
 #include <stdlib.h>
@@ -33,6 +33,8 @@ STAR update_position(STAR);
 STAR acceleration(STAR);
 
 STAR second_update(STAR);
+
+void start_thread();
 
 #define num_star 2000
 
@@ -129,8 +131,8 @@ void myDraw() {
     glPointSize(1.0);
     glBegin(GL_POINTS);
 
-    start_cal();
-
+   // start_cal();
+   start_thread();
     glColor3f(1.0, 1.0, 1.0);
     for (int i = 0; i < num_star; i++) {
         glVertex3f(galaxy.stars[i].position.x, galaxy.stars[i].position.y, galaxy.stars[i].position.z);
@@ -333,7 +335,7 @@ void start_thread(){
 
     //vytvorime strom pre vsetky hviezdy
     //   BARNESHUT *BH = BarnesHut_creat(-960,-540,-500,960,540,500);
-    BARNESHUT *BH = BarnesHut_creat(-10,-10,-10,10,10,10);
+    BARNESHUT *BH = BarnesHut_creat(-960*1e7,-540*1e7,-500*1e7,960*1e7,540*1e7,500*1e7);
     for (int i = 0;i<num_star;i++){
         BARNESHUT_add(BH,galaxy.stars[i].position,galaxy.stars[i].mass);
         BARNESHUT_add(BH,galaxy2.stars[i].position,galaxy2.stars[i].mass);
@@ -396,24 +398,18 @@ void start_thread(){
         range2[i].position.y = 0;
         range2[i].position.z = 0;
     }
-    int r1 = 0, r2=0, r3 = 0, r4 = 0;
-//prerobit
+    int r1 = 0, r2=0;
+
     for(int i = 0; i<num_star; i++){
         if (i<number_of_star_in_thread){
             range1[r1] = galaxy.stars[i];
+            range3[r1] = galaxy2.stars[i];
             r1++;
         }
-        if (i>=number_of_star_in_thread && i<(2*number_of_star_in_thread)){
+        if (i>=number_of_star_in_thread ){
             range2[r2] = galaxy.stars[i];
+            range4[r2] = galaxy2.stars[i];
             r2++;
-        }
-        if (i >= (2*number_of_star_in_thread) && i < (3*number_of_star_in_thread)){
-            range3[r3] = galaxy.stars[i];
-            r3++;
-        }
-        if (i >= (3*number_of_star_in_thread)) {
-            range4[r4] = galaxy.stars[i];
-            r4++;
         }
     }
 
@@ -433,24 +429,18 @@ void start_thread(){
     pthread_join(tid3, (void **) &receive_range3);
     pthread_join(tid4, (void **) &receive_range4);
 
-    r1 = 0; r2=0; r3=0; r4=0;
-    //prerobit
+    r1 = 0; r2=0;
+
     for(int i = 0; i<num_star; i++){
         if (i<number_of_star_in_thread){
-            galaxy.stars[i]  = receive_range1[r1] ;
+            galaxy.stars[i]  = receive_range1[r1];
+            galaxy2.stars[i] = receive_range3[r1];
             r1++;
         }
-        if (i>= number_of_star_in_thread && i<(2*number_of_star_in_thread)){
-            galaxy.stars[i] = receive_range2[r2] ;
+        if (i>= number_of_star_in_thread ){
+            galaxy.stars[i] = receive_range2[r2];
+            galaxy2.stars[i] = receive_range4[r2];
             r2++;
-        }
-        if (i >= (2*number_of_star_in_thread) && i < (3*number_of_star_in_thread)){
-            galaxy.stars[i] = receive_range3[r3];
-            r3++;
-        }
-        if (i >= (3*number_of_star_in_thread)) {
-            galaxy.stars[i] = receive_range4[r4];
-            r4++;
         }
     }
 
