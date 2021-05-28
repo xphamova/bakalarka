@@ -17,6 +17,8 @@ typedef struct {
 typedef struct {
     STAR stars[2000];
     VECTOR center;
+    VECTOR acceleration;
+    VECTOR velocity;
     double mass;
 } GALAXY;
 
@@ -52,13 +54,13 @@ GALAXY create_galaxy(float heightMagnitude, float heightFrequency, int numStar, 
         galaxy.mass += galaxy.stars[i].mass;
         //nastavenie pociatocnej rychlosti
         VECTOR up;
-        up.x=galaxy_center.x;
-        up.y=1.0*size;
-        up.z=galaxy_center.z;
+        up.x=0;
+        up.y=5.0*size;
+        up.z=0;
         VECTOR vz;
-        vz.x = galaxy.center.x - galaxy.stars[i].position.x ;
-        vz.y = galaxy.center.y - galaxy.stars[i].position.y  ;
-        vz.z = galaxy.center.z - galaxy.stars[i].position.z  ;
+        vz.x = galaxy.center.x - galaxy.stars[i].position.x;
+        vz.y = galaxy.center.y - galaxy.stars[i].position.y;
+        vz.z = galaxy.center.z - galaxy.stars[i].position.z;
 
         VECTOR vec = cross_vector(vz,up);
         VECTOR vec1 = norm_vector(vec);
@@ -66,9 +68,9 @@ GALAXY create_galaxy(float heightMagnitude, float heightFrequency, int numStar, 
         double orbital_velocity;
 
         orbital_velocity = orbital_vel(galaxy.stars[i].mass,Vector_magnitude(vz));
-        relative_vel.x = (vec1.x * orbital_velocity)*17;
-        relative_vel.y = (vec1.y * orbital_velocity)*17;
-        relative_vel.z = (vec1.z * orbital_velocity)*17;
+        relative_vel.x = (vec1.x * orbital_velocity)*16;
+        relative_vel.y = (vec1.y * orbital_velocity)*16;
+        relative_vel.z = (vec1.z * orbital_velocity)*16;
 
         galaxy.stars[i].velocity.x = velocity.x + relative_vel.x;
         galaxy.stars[i].velocity.y = velocity.y + relative_vel.y;
