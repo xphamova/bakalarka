@@ -64,7 +64,7 @@ int main(int argc, char *argv[]) {
 
     galaxy2 = create_galaxy(height_magnitude, height_frequency, num_star, galaxy_center_2, velocity2);
 
-    time_step = 1.0/64.0;
+    time_step = 1.0/524.0;
     half_time_step = 0.5 * time_step;
 
     /* Initialize window system */
