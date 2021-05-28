@@ -35,6 +35,9 @@ double orbital_vel(double, double);
 GALAXY create_galaxy(float heightMagnitude, float heightFrequency, int numStar, VECTOR galaxy_center, VECTOR velocity) {
 
     GALAXY galaxy;
+    galaxy.velocity.x = velocity.x;
+    galaxy.velocity.y = velocity.y;
+    galaxy.velocity.z = velocity.z;
     double size = 1e7;
     galaxy.center.x = galaxy_center.x*size;
     galaxy.center.y = galaxy_center.y*size;
@@ -55,7 +58,7 @@ GALAXY create_galaxy(float heightMagnitude, float heightFrequency, int numStar, 
         //nastavenie pociatocnej rychlosti
         VECTOR up;
         up.x=0;
-        up.y=5.0*size;
+        up.y=6.0*size;
         up.z=0;
         VECTOR vz;
         vz.x = galaxy.center.x - galaxy.stars[i].position.x;
@@ -68,9 +71,9 @@ GALAXY create_galaxy(float heightMagnitude, float heightFrequency, int numStar, 
         double orbital_velocity;
 
         orbital_velocity = orbital_vel(galaxy.stars[i].mass,Vector_magnitude(vz));
-        relative_vel.x = (vec1.x * orbital_velocity)*17;
-        relative_vel.y = (vec1.y * orbital_velocity)*17;
-        relative_vel.z = (vec1.z * orbital_velocity)*17;
+        relative_vel.x = (vec1.x * orbital_velocity)*30;
+        relative_vel.y = (vec1.y * orbital_velocity)*30;
+        relative_vel.z = (vec1.z * orbital_velocity)*30;
 
         galaxy.stars[i].velocity.x = velocity.x + relative_vel.x;
         galaxy.stars[i].velocity.y = velocity.y + relative_vel.y;
