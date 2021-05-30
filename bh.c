@@ -170,23 +170,23 @@ void calculate_force(OCTNODE *node,STAR *star){
     //nacitame hodnoty uzla
     BH_NODE bhNode = * (BH_NODE*)(node->usr_val);
     //vypocet vzdialenosti medzi COM a bodom
-    float div_x = (bhNode.COM.x-star->position.x);
-    float div_y = (bhNode.COM.y-star->position.y);
-    float div_z = (bhNode.COM.z-star->position.z);
-    float radius_ = sqrtf(powf(div_x,2)+powf(div_y,2)+powf(div_z,2));
+    double div_x = (bhNode.COM.x-star->position.x);
+    double div_y = (bhNode.COM.y-star->position.y);
+    double div_z = (bhNode.COM.z-star->position.z);
+    double radius_ = sqrtf(powf(div_x,2)+powf(div_y,2)+powf(div_z,2));
     //  float radius = sqrtf(powf(bhNode.COM.x,2)+powf(bhNode.COM.y,2)+powf(bhNode.COM.z,2));
     // ak sa radius = 0 ?
     // vypocet sirky uzla kvoli 3d vyratame priemer
-    float width = ((node->vector_top.x-node->vector_low.x) + (node->vector_top.y-node->vector_low.y) + (node->vector_top.z-node->vector_low.z))/3;
+    double width = ((node->vector_top.x-node->vector_low.x) + (node->vector_top.y-node->vector_low.y) + (node->vector_top.z-node->vector_low.z))/3;
     // prahova hodnota, vseobecne pouzivana 0.5
     if (width/radius_ < 0.5){
 
         //doplnenie
        // float radius_over_3 = powf(radius_,3);
        double denom = pow(radius_,2) + pow(EPS,2);
-        star->force.x = (G * bhNode.mass * star->mass * (bhNode.COM.x-star->position.x))/pow(denom,1.5);
-        star->force.y = (G * bhNode.mass * star->mass * (bhNode.COM.y-star->position.y))/pow(denom,1.5);
-        star->force.z = (G * bhNode.mass * star->mass * (bhNode.COM.z-star->position.z))/pow(denom,1.5);
+        star->force.x = (G * bhNode.mass * star->mass * (bhNode.COM.x-star->position.x))/pow(denom,1.5) * 2.0f;
+        star->force.y = (G * bhNode.mass * star->mass * (bhNode.COM.y-star->position.y))/pow(denom,1.5) * 2.0f;
+        star->force.z = (G * bhNode.mass * star->mass * (bhNode.COM.z-star->position.z))/pow(denom,1.5) * 2.0f;
     } else {
         for (int i=0; i < 8; i++){
             STAR child_force;

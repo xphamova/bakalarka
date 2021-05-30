@@ -54,7 +54,7 @@ GALAXY create_galaxy(float heightMagnitude, float heightFrequency, int numStar, 
         //nastavenie pociatocnej rychlosti
         VECTOR up;
         up.x=galaxy_center.x;
-        up.y=1.0*size;
+        up.y=6.0*size;
         up.z=galaxy_center.z;
         VECTOR vz;
         vz.x = galaxy.center.x - galaxy.stars[i].position.x ;
