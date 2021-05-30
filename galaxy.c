@@ -69,9 +69,9 @@ GALAXY create_galaxy(float heightMagnitude, float heightFrequency, int numStar, 
         double orbital_velocity;
 
         orbital_velocity = orbital_vel(galaxy.stars[i].mass,Vector_magnitude(vz));
-        relative_vel.x = (vec1.x * orbital_velocity)*1;
-        relative_vel.y = (vec1.y * orbital_velocity)*1;
-        relative_vel.z = (vec1.z * orbital_velocity)*1;
+        relative_vel.x = (vec1.x * orbital_velocity)*10;
+        relative_vel.y = (vec1.y * orbital_velocity)*10;
+        relative_vel.z = (vec1.z * orbital_velocity)*10;
 
         galaxy.stars[i].velocity.x = velocity.x + relative_vel.x;
         galaxy.stars[i].velocity.y = velocity.y + relative_vel.y;

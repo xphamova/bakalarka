@@ -60,7 +60,7 @@ int main(int argc, char *argv[]) {
     galaxy_center.y = 0;
     galaxy_center.z = 0;
 
-   velocity.x = 15 * 1e5;
+   velocity.x = 10 * 1e6;
   //  velocity.x = 0;
     velocity.y = 0;
     velocity.z = 0;
@@ -70,18 +70,18 @@ int main(int argc, char *argv[]) {
 
     //druha galaxia
     VECTOR galaxy_center_2, velocity2;
-    galaxy_center_2.x = 1.5;
+    galaxy_center_2.x = 1.2;
     galaxy_center_2.y = 0;
     galaxy_center_2.z = 0;
 
-    velocity2.x = -15 * 1e5;
+    velocity2.x = -10 * 1e6;
 //    velocity2.x = 0;
     velocity2.y = 0;
     velocity2.z = 0;
 
     galaxy2 = create_galaxy(height_magnitude, height_frequency, num_star, galaxy_center_2, velocity2);
 
-    time_step = 1.0/64.0;
+    time_step = 1.0/2048.0;
     half_time_step = 0.5 * time_step;
 
     /* Initialize window system */
@@ -349,7 +349,7 @@ void start_thread(){
     }
 
     // vyratame COM kazdeho uzla
-    Barneshut_cal_tree( BH->root_node);
+    Barneshut_cal_tree((OCTNODE *) BH->root_node);
 
     //zapiseme tieto veci do zdielanej pamate
     //shared memory
@@ -531,7 +531,7 @@ void *bh_start(void *input){
     for(int i = 0; i < num_star/2; i++){
         //kick : pos = pos + half_time_step * vel
         range[i] = update_position(range[i]);
-        calculate_force( BH->root_node, &range[i]);
+        calculate_force((OCTNODE *) BH->root_node, &range[i]);
         //drift : acc[i] = range.force[i]/range.mass[i]
         range[i] = acceleration(range[i]);
         range[i] = accel_from_center(range[i]);
