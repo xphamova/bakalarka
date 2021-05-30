@@ -57,7 +57,7 @@ int main(int argc, char *argv[]) {
 
     //druha galaxia
     VECTOR galaxy_center_2, velocity2;
-    galaxy_center_2.x = 1.5;
+    galaxy_center_2.x = 1.2;
     galaxy_center_2.y = 0;
     galaxy_center_2.z = 0;
 
