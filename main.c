@@ -36,7 +36,7 @@ STAR second_update(STAR);
 
 void start_thread();
 
-#define num_star 2000
+#define num_star 500
 
 double half_time_step;
 double time_step;
@@ -55,8 +55,8 @@ int main(int argc, char *argv[]) {
     galaxy_center.y = 0;
     galaxy_center.z = 0;
 
-   //velocity.x = 15 * 1e5;
-    velocity.x = 0;
+   velocity.x = 15 * 1e5;
+  //  velocity.x = 0;
     velocity.y = 0;
     velocity.z = 0;
 
@@ -69,8 +69,8 @@ int main(int argc, char *argv[]) {
     galaxy_center_2.y = 0;
     galaxy_center_2.z = 0;
 
-//    velocity2.x = -15 * 1e5;
-    velocity2.x = 0;
+    velocity2.x = -15 * 1e5;
+//    velocity2.x = 0;
     velocity2.y = 0;
     velocity2.z = 0;
 
@@ -364,7 +364,7 @@ void start_thread(){
     }
 
     //podelienie hviezd vlaknam
-    //vyriesit problem ak cislo nie je delitelne 4
+    //vyriesit problem ak cislo nie je delitelne 2
     int number_of_star_in_thread = num_star/2;
     STAR range1[number_of_star_in_thread];
     STAR range2[number_of_star_in_thread],range3[number_of_star_in_thread],range4[number_of_star_in_thread];
@@ -398,6 +398,21 @@ void start_thread(){
         range2[i].position.x = 0;
         range2[i].position.y = 0;
         range2[i].position.z = 0;
+    }
+    for (int i=0; i<number_of_star_in_thread;i++) {
+        range3[i].mass = 0;
+        range3[i].force.x = 0;
+        range3[i].force.y = 0;
+        range3[i].force.z = 0;
+        range3[i].acceleration.x = 0;
+        range3[i].acceleration.y = 0;
+        range3[i].acceleration.z = 0;
+        range3[i].velocity.x = 0;
+        range3[i].velocity.y = 0;
+        range3[i].velocity.z = 0;
+        range3[i].position.x = 0;
+        range3[i].position.y = 0;
+        range3[i].position.z = 0;
     }
 
     for (int i=0; i<number_of_star_in_thread;i++) {
@@ -443,7 +458,7 @@ void start_thread(){
     send_range3 = &range3;
     send_range4 = &range4;
     pthread_t tid1, tid2,tid3,tid4;
-    pthread_create(&tid1, NULL, bh_start, send_range1);//start thread
+    pthread_create(&tid1, NULL, bh_start, (void *) send_range1);//start thread
     pthread_create(&tid2, NULL, bh_start, (void *) send_range2);
     pthread_create(&tid3, NULL, bh_start, (void *) send_range3);
     pthread_create(&tid4, NULL, bh_start, (void *) send_range4);
@@ -456,7 +471,11 @@ void start_thread(){
 
     for(int i = 0; i<num_star; i++){
         if (i<number_of_star_in_thread){
+            STAR help = galaxy.stars[i];
             galaxy.stars[i]  = receive_range1[r1];
+            if(help.position.x == galaxy.stars[i].position.x){
+                printf("%d\n",i);
+            }
             r1++;
         }
         if (i<number_of_star_in_thread){
@@ -465,11 +484,11 @@ void start_thread(){
         }
         if (i>= number_of_star_in_thread ){
             galaxy.stars[i] = receive_range2[r2];
-            galaxy2.stars[i] = receive_range4[r2];
             r2++;
         }
         if(i>= number_of_star_in_thread){
-
+            galaxy2.stars[i] = receive_range4[r4];
+            r4++;
         }
     }
 
@@ -480,11 +499,11 @@ void start_thread(){
 
 void *bh_start(void *input){
 
-    STAR range[num_star/4];
+    STAR range[num_star/2];
     STAR *ran = (STAR *)input;
     int size = 0;
 
-    for (int i = 0; i< num_star/4; i++){
+    for (int i = 0; i< num_star/2; i++){
         range[i] = *(ran + i);
         if(range[i].mass != 0){
             size++;
@@ -502,7 +521,7 @@ void *bh_start(void *input){
 
 
 
-    for(int i = 0; i < num_star/4; i++){
+    for(int i = 0; i < num_star/2; i++){
         //kick : pos = pos + half_time_step * vel
         range[i] = update_position(range[i]);
         calculate_force( BH->root_node, &range[i]);
