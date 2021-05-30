@@ -19,6 +19,8 @@ typedef struct {
     STAR stars[500];
     VECTOR center;
     double mass;
+    VECTOR acceleration;
+    VECTOR velocity;
 } GALAXY;
 
 VECTOR star_position(double, double, double);
