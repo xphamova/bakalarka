@@ -113,7 +113,9 @@ void sub_insert(OCTNODE *node,VECTOR position,float mass,void *usr_val){
 }
 
 BARNESHUT* BarnesHut_creat(float min_x,float min_y,float min_z,float max_x,float max_y,float max_z){
-    BARNESHUT *barneshut = malloc(sizeof (BARNESHUT));
+  //  BARNESHUT *barneshut = malloc(sizeof(BARNESHUT));
+    BARNESHUT *barneshut = malloc(sizeof(BARNESHUT));
+    printf("aaa");
     barneshut->root_node = create_node(min_x,min_y,min_z,max_x,max_y,max_z);
     barneshut->node = 0;
     return barneshut;

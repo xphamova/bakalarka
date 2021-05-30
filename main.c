@@ -365,7 +365,7 @@ void start_thread(){
 
     //podelienie hviezd vlaknam
     //vyriesit problem ak cislo nie je delitelne 4
-    int number_of_star_in_thread = num_star/4;
+    int number_of_star_in_thread = num_star/2;
     STAR range1[number_of_star_in_thread];
     STAR range2[number_of_star_in_thread],range3[number_of_star_in_thread],range4[number_of_star_in_thread];
 
@@ -415,18 +415,24 @@ void start_thread(){
         range4[i].position.y = 0;
         range4[i].position.z = 0;
     }
-    int r1 = 0, r2=0;
+    int r1 = 0, r2=0, r3 = 0, r4=0;
 
     for(int i = 0; i<num_star; i++){
         if (i<number_of_star_in_thread){
             range1[r1] = galaxy.stars[i];
-            range3[r1] = galaxy2.stars[i];
             r1++;
+        }
+        if (i<number_of_star_in_thread){
+            range3[r3] = galaxy2.stars[i];
+            r3++;
         }
         if (i>=number_of_star_in_thread ){
             range2[r2] = galaxy.stars[i];
-            range4[r2] = galaxy2.stars[i];
             r2++;
+        }
+        if(i>=number_of_star_in_thread){
+            range4[r4] = galaxy2.stars[i];
+            r4++;
         }
     }
 
@@ -446,23 +452,29 @@ void start_thread(){
     pthread_join(tid3, (void **) &receive_range3);
     pthread_join(tid4, (void **) &receive_range4);
 
-    r1 = 0; r2=0;
+    r1 = 0; r2=0; r3=0; r4=0;
 
     for(int i = 0; i<num_star; i++){
         if (i<number_of_star_in_thread){
             galaxy.stars[i]  = receive_range1[r1];
-            galaxy2.stars[i] = receive_range3[r1];
             r1++;
+        }
+        if (i<number_of_star_in_thread){
+            galaxy2.stars[i] = receive_range3[r3];
+            r3++;
         }
         if (i>= number_of_star_in_thread ){
             galaxy.stars[i] = receive_range2[r2];
             galaxy2.stars[i] = receive_range4[r2];
             r2++;
         }
+        if(i>= number_of_star_in_thread){
+
+        }
     }
 
-//    free_node((OCTNODE *) BH->root_node);
-//    free(BH);
+    free_node((OCTNODE *) BH->root_node);
+    free(BH);
     BH = NULL;
 }
 
