@@ -39,6 +39,8 @@ void start_thread();
 void update_center_first();
 
 void update_center_sec();
+
+STAR accel_from_center(STAR);
 #define num_star 500
 
 double half_time_step;
@@ -532,6 +534,7 @@ void *bh_start(void *input){
         calculate_force( BH->root_node, &range[i]);
         //drift : acc[i] = range.force[i]/range.mass[i]
         range[i] = acceleration(range[i]);
+        range[i] = accel_from_center(range[i]);
         // kick : vel =vel + acc[i]* timestep; pos = half_time_step * vel
         range[i] = second_update(range[i]);
     }
@@ -657,3 +660,28 @@ void update_center_sec(){
     galaxy2.center.z += half_time_step * galaxy2.velocity.z;
 }
 
+STAR accel_from_center(STAR star){
+    double G = 6.6742367e-11; // m^3.kg^-1.s^-2
+    double EPS =3e4;
+    float num = 2.0f;
+    double dx = star.position.x - galaxy.center.x;
+    double dy = star.position.y - galaxy.center.y;
+    double dz = star.position.z - galaxy.center.z;
+    double dist = sqrt(dx * dx + dy * dy + dz * dz);
+    double preff = pow(dist,2) + pow(EPS,2);
+    double pref = -G/pow(preff,1.5)*galaxy.mass;
+    star.acceleration.x += pref * dx * num;
+    star.acceleration.y += pref * dy * num;
+    star.acceleration.z += pref * dz * num;
+
+    double dx2 = star.position.x - galaxy2.center.x;
+    double dy2 = star.position.y - galaxy2.center.y;
+    double dz2 = star.position.z - galaxy2.center.z;
+    double dist2 = sqrt(dx2 * dx2 + dy2 * dy2 + dz2 * dz2);
+    double preff2 = pow(dist2,2) + pow(EPS,2);
+    double pref2 = -G/pow(preff2,1.5)*galaxy.mass;
+    star.acceleration.x += pref2 * dx2 * num;
+    star.acceleration.y += pref2 * dy2 * num;
+    star.acceleration.z += pref2 * dz2 * num;
+    return star;
+}
