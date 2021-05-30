@@ -340,6 +340,7 @@ void start_thread(){
         BARNESHUT_add(BH,galaxy.stars[i].position,galaxy.stars[i].mass);
         BARNESHUT_add(BH,galaxy2.stars[i].position,galaxy2.stars[i].mass);
     }
+
     // vyratame COM kazdeho uzla
     Barneshut_cal_tree( BH->root_node);
 
@@ -398,6 +399,22 @@ void start_thread(){
         range2[i].position.y = 0;
         range2[i].position.z = 0;
     }
+
+    for (int i=0; i<number_of_star_in_thread;i++) {
+        range4[i].mass = 0;
+        range4[i].force.x = 0;
+        range4[i].force.y = 0;
+        range4[i].force.z = 0;
+        range4[i].acceleration.x = 0;
+        range4[i].acceleration.y = 0;
+        range4[i].acceleration.z = 0;
+        range4[i].velocity.x = 0;
+        range4[i].velocity.y = 0;
+        range4[i].velocity.z = 0;
+        range4[i].position.x = 0;
+        range4[i].position.y = 0;
+        range4[i].position.z = 0;
+    }
     int r1 = 0, r2=0;
 
     for(int i = 0; i<num_star; i++){
@@ -444,8 +461,8 @@ void start_thread(){
         }
     }
 
-    free_node((OCTNODE *) BH->root_node);
-    free(BH);
+//    free_node((OCTNODE *) BH->root_node);
+//    free(BH);
     BH = NULL;
 }
 
