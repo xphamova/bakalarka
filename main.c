@@ -41,7 +41,7 @@ void update_center_first();
 void update_center_sec();
 
 STAR accel_from_center(STAR);
-#define num_star 500
+#define num_star 1000
 
 double half_time_step;
 double time_step;
@@ -144,205 +144,27 @@ void myDraw() {
     for (int i = 0; i < num_star; i++) {
         glVertex3f(galaxy.stars[i].position.x, galaxy.stars[i].position.y, galaxy.stars[i].position.z);
     }
-    glColor3f(1.0, 0.2, 0.2);
+    glColor3f(0.9, 0.9, 0.9);
     for (int i = 0; i < num_star; i++) {
         glVertex3f(galaxy2.stars[i].position.x, galaxy2.stars[i].position.y, galaxy2.stars[i].position.z);
     }
-    glVertex3f(0, 0, 0);
-    glColor3f(1.0, 1.0, 1.0);
-    glPointSize(5.0);
+    glColor3f(0.5, 0.5, 0.5);
+    glPointSize(15.0);
+
+    glVertex3f(galaxy.center.x,galaxy.center.y, galaxy.center.z);
+    glColor3f(0.5, 0.5, 0.5);
+    glPointSize(15.0);
     glVertex3f(galaxy2.center.x, galaxy2.center.y, galaxy2.center.z);
 
     glEnd();
     glutSwapBuffers();
 }
 
-void start_cal(){
-    int range1[2], range2[2];
-    void *send_range1, *send_range2;
-    double *receive_range1, *receive_range2, *receive_range3, *receive_range4;
-    range1[0]=0;
-    range1[1]= num_star/2;
-    range2[0]=num_star/2;
-    range2[1]=num_star;
-
-    send_range1 = &range1;
-    send_range2 = &range2;
-
-    pthread_t tid1, tid2, tid3, tid4;
-
-    //prva galaxia
-    pthread_create(&tid1, NULL, calculate_galaxy1, (void *) send_range1);//start thread
-    pthread_create(&tid2, NULL, calculate_galaxy1, (void *) send_range2);
-    //druha
-    pthread_create(&tid3, NULL, calculate_galaxy2, (void *) send_range1);
-    pthread_create(&tid4, NULL, calculate_galaxy2, (void *) send_range2);
-
-    pthread_join(tid1, (void **) &receive_range1);
-    pthread_join(tid2, (void **) &receive_range2);
-    pthread_join(tid3, (void **) &receive_range3);
-    pthread_join(tid4, (void **) &receive_range4);
-
-
-}
-
-void* calculate_galaxy1(void* param){
-    int *ran = (int *) param;
-    int start, end;
-
-    start = *(ran);
-    end = *(ran + 1);
-
-    for(int i = start; i<end; i++){
-        galaxy.stars[i].position.x += half_time_step * galaxy.stars[i].velocity.x;
-        galaxy.stars[i].position.y += half_time_step * galaxy.stars[i].velocity.y;
-        galaxy.stars[i].position.z += half_time_step * galaxy.stars[i].velocity.z;
-    }
-    gravity_calculate_acceleration(start,end);
-
-    for(int i = start; i<end; i++){
-
-        galaxy.stars[i].velocity.x += time_step * galaxy.stars[i].acceleration.x;
-        galaxy.stars[i].velocity.y += time_step * galaxy.stars[i].acceleration.y;
-        galaxy.stars[i].velocity.z += time_step * galaxy.stars[i].acceleration.z;
-
-
-        galaxy.stars[i].position.x += half_time_step * galaxy.stars[i].velocity.x;
-        galaxy.stars[i].position.y += half_time_step * galaxy.stars[i].velocity.y;
-        galaxy.stars[i].position.z += half_time_step * galaxy.stars[i].velocity.z;
-    }
-
-
-
-}
-
-void *calculate_galaxy2(void* param) {
-    int *ran = (int *) param;
-    int start, end;
-
-    start = *(ran);
-    end = *(ran + 1);
-
-    for (int i = start; i < end; i++) {
-        galaxy2.stars[i].position.x += half_time_step * galaxy2.stars[i].velocity.x;
-        galaxy2.stars[i].position.y += half_time_step * galaxy2.stars[i].velocity.y;
-        galaxy2.stars[i].position.z += half_time_step * galaxy2.stars[i].velocity.z;
-    }
-
-
-    gravity_calculate_acceleration2(start,end);
-    for (int i = start; i < end; i++) {
-        galaxy2.stars[i].velocity.x += time_step * galaxy2.stars[i].acceleration.x;
-        galaxy2.stars[i].velocity.y += time_step * galaxy2.stars[i].acceleration.y;
-        galaxy2.stars[i].velocity.z += time_step * galaxy2.stars[i].acceleration.z;
-
-        galaxy2.stars[i].position.x += half_time_step * galaxy2.stars[i].velocity.x;
-        galaxy2.stars[i].position.y += half_time_step * galaxy2.stars[i].velocity.y;
-        galaxy2.stars[i].position.z += half_time_step * galaxy2.stars[i].velocity.z;
-    }
-}
-
-//vypocet pre prvu
-void gravity_calculate_acceleration(int start, int end) {
-    double G = 6.6742367e-11; // m^3.kg^-1.s^-2
-    double EPS =3e4;
-
-    for (int i = start; i < end; i++) {
-        galaxy.stars[i].acceleration.x = 0;
-        galaxy.stars[i].acceleration.y = 0;
-        galaxy.stars[i].acceleration.z = 0;
-        for (int j = 0; j < num_star; j++) {
-            if (j == i) {
-                double dx2 = galaxy.stars[i].position.x - galaxy2.stars[j].position.x;
-                double dy2 = galaxy.stars[i].position.y - galaxy2.stars[j].position.y;
-                double dz2 = galaxy.stars[i].position.z - galaxy2.stars[j].position.z;
-                double dist2 = sqrt(dx2 * dx2 + dy2 * dy2 + dz2 * dz2);
-                double preff2 = pow(dist2,2) + pow(EPS,2);
-                double pref2 = -G/pow(preff2,1.5)*galaxy2.stars[j].mass;
-                galaxy.stars[i].acceleration.x += pref2 * dx2;
-                galaxy.stars[i].acceleration.y += pref2 * dy2;
-                galaxy.stars[i].acceleration.z += pref2 * dz2;
-                continue;
-            }
-//            vypocet vzdielonosti medzi hviezdami vramci svojej galaxie
-            double dx = galaxy.stars[i].position.x - galaxy.stars[j].position.x;
-            double dy = galaxy.stars[i].position.y - galaxy.stars[j].position.y;
-            double dz = galaxy.stars[i].position.z - galaxy.stars[j].position.z;
-
-            double dist = sqrt(dx * dx + dy * dy+ dz * dz);
-            double preff = pow(dist,2) + pow(EPS,2);
-            double pref = -G/pow(preff,1.5)*galaxy.stars[j].mass;
-            galaxy.stars[i].acceleration.x += pref * dx;
-            galaxy.stars[i].acceleration.y += pref * dy;
-            galaxy.stars[i].acceleration.z += pref * dz;
-
-            //s druhou galaxiou
-            double dx2 = galaxy.stars[i].position.x - galaxy2.stars[j].position.x;
-            double dy2 = galaxy.stars[i].position.y - galaxy2.stars[j].position.y;
-            double dz2 = galaxy.stars[i].position.z - galaxy2.stars[j].position.z;
-            double dist2 = sqrt(dx2 * dx2 + dy2 * dy2 + dz2 * dz2);
-            double preff2 = pow(dist2,2) + pow(EPS,2);
-            double pref2 = -G/pow(preff2,1.5)*galaxy2.stars[j].mass;
-            galaxy.stars[i].acceleration.x += pref2 * dx2;
-            galaxy.stars[i].acceleration.y += pref2 * dy2;
-            galaxy.stars[i].acceleration.z += pref2 * dz2;
-
-        }
-    }
-
-}
-
-//vypocet pre druhu
-void gravity_calculate_acceleration2(int start, int end) {
-    double G = 6.6742367e-11; // m^3.kg^-1.s^-2
-    double EPS =3e4;
-    for (int i = start; i < end; i++) {
-        galaxy2.stars[i].acceleration.x = 0;
-        galaxy2.stars[i].acceleration.y = 0;
-        galaxy2.stars[i].acceleration.z = 0;
-        for (int j = 0; j < num_star; j++) {
-            if (j == i) {
-                double dx2 = galaxy2.stars[i].position.x - galaxy.stars[j].position.x;
-                double dy2 = galaxy2.stars[i].position.y - galaxy.stars[j].position.y;
-                double dz2 = galaxy2.stars[i].position.z - galaxy.stars[j].position.z;
-                double dist2 = sqrt(dx2 * dx2 + dy2 * dy2 + dz2 * dz2);
-                double preff2 = pow(dist2,2) + pow(EPS,2);
-                double pref2 = -G/pow(preff2,1.5)*galaxy.stars[j].mass;
-                galaxy2.stars[i].acceleration.x += pref2 * dx2;
-                galaxy2.stars[i].acceleration.y += pref2 * dy2;
-                galaxy2.stars[i].acceleration.z += pref2 * dz2;
-                continue;
-            }
-            double dx = galaxy2.stars[i].position.x - galaxy2.stars[j].position.x;
-            double dy = galaxy2.stars[i].position.y - galaxy2.stars[j].position.y;
-            double dz = galaxy2.stars[i].position.z - galaxy2.stars[j].position.z;
-            double dist = sqrt(dx * dx + dy * dy + dz * dz);
-            double preff = pow(dist,2) + pow(EPS,2);
-            double pref = -G/pow(preff,1.5)*galaxy2.stars[j].mass;
-            galaxy2.stars[i].acceleration.x += pref * dx;
-            galaxy2.stars[i].acceleration.y += pref * dy;
-            galaxy2.stars[i].acceleration.z += pref * dz;
-
-            //s druhou galaxiou
-            double dx2 = galaxy2.stars[i].position.x - galaxy.stars[j].position.x;
-            double dy2 = galaxy2.stars[i].position.y - galaxy.stars[j].position.y;
-            double dz2 = galaxy2.stars[i].position.z - galaxy.stars[j].position.z;
-            double dist2 = sqrt(dx2 * dx2 + dy2 * dy2 + dz2 * dz2);
-            double preff2 = pow(dist2,2) + pow(EPS,2);
-            double pref2 = -G/pow(preff2,1.5)*galaxy.stars[j].mass;
-            galaxy2.stars[i].acceleration.x += pref2 * dx2;
-            galaxy2.stars[i].acceleration.y += pref2 * dy2;
-            galaxy2.stars[i].acceleration.z += pref2 * dz2;
-
-        }
-    }
-
-}
 void start_thread(){
 
     //vytvorime strom pre vsetky hviezdy
     //   BARNESHUT *BH = BarnesHut_creat(-960,-540,-500,960,540,500);
-    BARNESHUT *BH = BarnesHut_creat(-96*1e7,-54*1e7,-50*1e7,96*1e7,54*1e7,50*1e7);
+    BARNESHUT *BH = BarnesHut_creat(-96*1e8,-54*1e8,-50*1e8,96*1e8,54*1e8,50*1e8);
     for (int i = 0;i<num_star;i++){
         BARNESHUT_add(BH,galaxy.stars[i].position,galaxy.stars[i].mass);
         BARNESHUT_add(BH,galaxy2.stars[i].position,galaxy2.stars[i].mass);
@@ -663,7 +485,7 @@ void update_center_sec(){
 STAR accel_from_center(STAR star){
     double G = 6.6742367e-11; // m^3.kg^-1.s^-2
     double EPS =3e4;
-    float num = 2.0f;
+    float num = 5.0f;
     double dx = star.position.x - galaxy.center.x;
     double dy = star.position.y - galaxy.center.y;
     double dz = star.position.z - galaxy.center.z;
