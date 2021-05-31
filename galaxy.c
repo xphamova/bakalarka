@@ -29,7 +29,7 @@ double Vector_magnitude(VECTOR);
 
 VECTOR norm_vector(VECTOR);
 
-VECTOR cross_vector(VECTOR, VECTOR);
+VECTOR vector_product(VECTOR first, VECTOR second);
 
 double orbital_vel(double, double);
 
@@ -66,7 +66,7 @@ GALAXY create_galaxy(float heightMagnitude, float heightFrequency, int numStar, 
         vz.y = galaxy.center.y - galaxy.stars[i].position.y  ;
         vz.z = galaxy.center.z - galaxy.stars[i].position.z  ;
 
-        VECTOR vec = cross_vector(vz,up);
+        VECTOR vec = vector_product(vz, up);
         VECTOR vec1 = norm_vector(vec);
         VECTOR relative_vel;
         double orbital_velocity;
@@ -158,13 +158,13 @@ VECTOR norm_vector(VECTOR vector){
     return vector1;
 }
 
-VECTOR cross_vector(VECTOR first, VECTOR second){
-    VECTOR out_vector;
-    out_vector.x = first.y * second.z - first.z * second.y;
-    out_vector.y = first.z * second.x - first.x * second.z;
-    out_vector.z = first.x * second.y - first.y * second.x;
+VECTOR vector_product(VECTOR first, VECTOR second){
+    VECTOR vector_product;
+    vector_product.x = first.y * second.z - first.z * second.y;
+    vector_product.y = first.z * second.x - first.x * second.z;
+    vector_product.z = first.x * second.y - first.y * second.x;
 
-    return out_vector;
+    return vector_product;
 }
 
 double orbital_vel(double mass,double radius){
