@@ -56,7 +56,7 @@ int main(int argc, char *argv[]) {
 
     //prva galaxia
     VECTOR galaxy_center, velocity;
-    galaxy_center.x = 0;
+    galaxy_center.x = 0.3;
     galaxy_center.y = 0;
     galaxy_center.z = 0;
 
@@ -342,7 +342,7 @@ void start_thread(){
 
     //vytvorime strom pre vsetky hviezdy
     //   BARNESHUT *BH = BarnesHut_creat(-960,-540,-500,960,540,500);
-    BARNESHUT *BH = BarnesHut_creat(-960*1e7,-540*1e7,-500*1e7,960*1e7,540*1e7,500*1e7);
+    BARNESHUT *BH = BarnesHut_creat(-96*1e7,-54*1e7,-50*1e7,96*1e7,54*1e7,50*1e7);
     for (int i = 0;i<num_star;i++){
         BARNESHUT_add(BH,galaxy.stars[i].position,galaxy.stars[i].mass);
         BARNESHUT_add(BH,galaxy2.stars[i].position,galaxy2.stars[i].mass);

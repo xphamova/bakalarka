@@ -13,7 +13,7 @@ typedef struct {
 
     void *usr_val;
 
-    float node_mass;
+    double node_mass;
 
 }OCTNODE;
 
@@ -23,13 +23,13 @@ typedef struct {
 }BARNESHUT;
 
 typedef struct {
-    float mass;
+    double mass;
     VECTOR COM;
 }BH_NODE;
 
-void sub_insert(OCTNODE *node,VECTOR position,float ,void *);
+void sub_insert(OCTNODE *node,VECTOR position,double ,void *);
 
-struct OCTNODE * create_node(float x1, float y1, float z1, float x2, float y2, float z2){
+struct OCTNODE * create_node(double x1, double y1, double z1, double x2, double y2, double z2){
     OCTNODE *node = malloc(sizeof(OCTNODE));
     // ohranicenie priestoru
     node->vector_top.x = (x1 < x2 ? x2 : x1);
@@ -58,7 +58,7 @@ struct OCTNODE * create_node(float x1, float y1, float z1, float x2, float y2, f
     return (struct OCTNODE *) node;
 }
 
-void insert(OCTNODE *node,VECTOR position_star,float mass,void *usr_val){
+void insert(OCTNODE *node,VECTOR position_star,double mass,void *usr_val){
     if (node->bodies == 0){
         node->position_star = position_star;
         node->node_mass = mass;
@@ -73,9 +73,9 @@ void insert(OCTNODE *node,VECTOR position_star,float mass,void *usr_val){
     node->bodies++;
     // return node->bodies;
 }
-void sub_insert(OCTNODE *node,VECTOR position,float mass,void *usr_val){
+void sub_insert(OCTNODE *node,VECTOR position,double mass,void *usr_val){
     //nadelenie uzla na 8 pod uzlov, zistujeme v kotrom pod uzly sa nachadza bod
-    float min_x, min_y, min_z, max_x, max_y, max_z;
+    double min_x, min_y, min_z, max_x, max_y, max_z;
     int sub = 0;
     if(position.x > node->vector_mid.x){
         sub += 1;
@@ -108,11 +108,11 @@ void sub_insert(OCTNODE *node,VECTOR position,float mass,void *usr_val){
         (node->children[sub]) = create_node(min_x,min_y,min_z,max_x,max_y,max_z);
 
     //vratime uzol
-    insert(node->children[sub],position,mass,usr_val);
+    insert((OCTNODE *) node->children[sub], position, mass, usr_val);
     //  return insert((OCTNODE *) node->children[sub], position);
 }
 
-BARNESHUT* BarnesHut_creat(float min_x,float min_y,float min_z,float max_x,float max_y,float max_z){
+BARNESHUT* BarnesHut_creat(double min_x,double min_y,double min_z,double max_x,double max_y,double max_z){
   //  BARNESHUT *barneshut = malloc(sizeof(BARNESHUT));
     BARNESHUT *barneshut = malloc(sizeof(BARNESHUT));
     barneshut->root_node = create_node(min_x,min_y,min_z,max_x,max_y,max_z);
@@ -120,7 +120,7 @@ BARNESHUT* BarnesHut_creat(float min_x,float min_y,float min_z,float max_x,float
     return barneshut;
 }
 
-int BARNESHUT_add(BARNESHUT *barneshut,VECTOR position,float mass){
+int BARNESHUT_add(BARNESHUT *barneshut,VECTOR position,double mass){
     BH_NODE  *bh = malloc(sizeof (BH_NODE));
     bh->mass = mass;
     bh->COM.x = position.x;
@@ -145,9 +145,9 @@ void Barneshut_cal_tree(OCTNODE* node){
             if(!node->children[i])
                 continue;
             Barneshut_cal_tree((OCTNODE *) node->children[i]);
-            OCTNODE *child_node = node->children[i];
+            OCTNODE *child_node = (OCTNODE *) node->children[i];
             BH_NODE *child_bh_node = (BH_NODE*) child_node->usr_val;
-            float child_mass = child_bh_node->mass;
+            double child_mass = child_bh_node->mass;
             Bh_node->mass += child_mass;
             Bh_node->COM.x += child_mass*child_bh_node->COM.x;
             Bh_node->COM.y += child_mass*child_bh_node->COM.y;
@@ -173,7 +173,7 @@ void calculate_force(OCTNODE *node,STAR *star){
     double div_x = (bhNode.COM.x-star->position.x);
     double div_y = (bhNode.COM.y-star->position.y);
     double div_z = (bhNode.COM.z-star->position.z);
-    double radius_ = sqrtf(powf(div_x,2)+powf(div_y,2)+powf(div_z,2));
+    double radius_ = sqrt(pow(div_x,2)+pow(div_y,2)+pow(div_z,2));
     //  float radius = sqrtf(powf(bhNode.COM.x,2)+powf(bhNode.COM.y,2)+powf(bhNode.COM.z,2));
     // ak sa radius = 0 ?
     // vypocet sirky uzla kvoli 3d vyratame priemer
@@ -184,9 +184,9 @@ void calculate_force(OCTNODE *node,STAR *star){
         //doplnenie
        // float radius_over_3 = powf(radius_,3);
        double denom = pow(radius_,2) + pow(EPS,2);
-        star->force.x = (G * bhNode.mass * star->mass * (bhNode.COM.x-star->position.x))/pow(denom,1.5) * 5.0f;
-        star->force.y = (G * bhNode.mass * star->mass * (bhNode.COM.y-star->position.y))/pow(denom,1.5) * 5.0f;
-        star->force.z = (G * bhNode.mass * star->mass * (bhNode.COM.z-star->position.z))/pow(denom,1.5) * 5.0f;
+        star->force.x = (G * bhNode.mass * star->mass * (bhNode.COM.x-star->position.x))/pow(denom,1.5) * 20.0f;
+        star->force.y = (G * bhNode.mass * star->mass * (bhNode.COM.y-star->position.y))/pow(denom,1.5) * 20.0f;
+        star->force.z = (G * bhNode.mass * star->mass * (bhNode.COM.z-star->position.z))/pow(denom,1.5) * 20.0f;
     } else {
         for (int i=0; i < 8; i++){
             STAR child_force;
