@@ -184,9 +184,9 @@ void calculate_force(OCTNODE *node,STAR *star){
         //doplnenie
        // float radius_over_3 = powf(radius_,3);
        double denom = pow(radius_,2) + pow(EPS,2);
-        star->force.x = (G * bhNode.mass * star->mass * (bhNode.COM.x-star->position.x))/pow(denom,1.5) * 5.0f;
-        star->force.y = (G * bhNode.mass * star->mass * (bhNode.COM.y-star->position.y))/pow(denom,1.5) * 5.0f;
-        star->force.z = (G * bhNode.mass * star->mass * (bhNode.COM.z-star->position.z))/pow(denom,1.5) * 5.0f;
+        star->force.x = (G * bhNode.mass * star->mass * (bhNode.COM.x-star->position.x))/pow(denom,1.5) * 4.0f;
+        star->force.y = (G * bhNode.mass * star->mass * (bhNode.COM.y-star->position.y))/pow(denom,1.5) * 4.0f;
+        star->force.z = (G * bhNode.mass * star->mass * (bhNode.COM.z-star->position.z))/pow(denom,1.5) * 4.0f;
     } else {
         for (int i=0; i < 8; i++){
             STAR child_force;

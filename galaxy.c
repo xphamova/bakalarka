@@ -16,7 +16,7 @@ typedef struct {
 } STAR;
 
 typedef struct {
-    STAR stars[1000];
+    STAR stars[500];
     VECTOR center;
     double mass;
     VECTOR acceleration;
@@ -79,6 +79,9 @@ GALAXY create_galaxy(float heightMagnitude, float heightFrequency, int numStar, 
         galaxy.stars[i].velocity.x = velocity.x + relative_vel.x;
         galaxy.stars[i].velocity.y = velocity.y + relative_vel.y;
         galaxy.stars[i].velocity.z = velocity.z + relative_vel.z;
+//        galaxy.stars[i].velocity.x = velocity.x;
+//        galaxy.stars[i].velocity.y = velocity.y;
+//        galaxy.stars[i].velocity.z = velocity.z;
 
         galaxy.stars[i].acceleration.x = 0;
         galaxy.stars[i].acceleration.y = 0;

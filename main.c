@@ -16,17 +16,7 @@ void myInit();
 
 void myDraw();
 
-void gravity_calculate_acceleration(int,int);
-
-void gravity_calculate_acceleration2(int,int);
-
-void *calculate_galaxy2(void*);
-
-void* calculate_galaxy1(void*);
-
 void *bh_start();
-
-void start_cal();
 
 STAR update_position(STAR);
 
@@ -41,7 +31,7 @@ void update_center_first();
 void update_center_sec();
 
 STAR accel_from_center(STAR);
-#define num_star 1000
+#define num_star 500
 
 double half_time_step;
 double time_step;
@@ -56,7 +46,7 @@ int main(int argc, char *argv[]) {
 
     //prva galaxia
     VECTOR galaxy_center, velocity;
-    galaxy_center.x = 0.3;
+    galaxy_center.x = 0;
     galaxy_center.y = 0;
     galaxy_center.z = 0;
 
@@ -136,7 +126,7 @@ void myDraw() {
     glPointSize(1.0);
     glBegin(GL_POINTS);
 
-   // start_cal();
+
    start_thread();
    update_center_first();
    update_center_sec();
@@ -153,7 +143,7 @@ void myDraw() {
 
     glVertex3f(galaxy.center.x,galaxy.center.y, galaxy.center.z);
     glColor3f(0.5, 0.5, 0.5);
-    glPointSize(15.0);
+    glPointSize(15.0*1e7);
     glVertex3f(galaxy2.center.x, galaxy2.center.y, galaxy2.center.z);
 
     glEnd();
@@ -485,7 +475,7 @@ void update_center_sec(){
 STAR accel_from_center(STAR star){
     double G = 6.6742367e-11; // m^3.kg^-1.s^-2
     double EPS =3e4;
-    float num = 5.0f;
+    float num = 4.0f;
     double dx = star.position.x - galaxy.center.x;
     double dy = star.position.y - galaxy.center.y;
     double dz = star.position.z - galaxy.center.z;
