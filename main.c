@@ -46,7 +46,7 @@ int main(int argc, char *argv[]) {
 
     //prva galaxia
     VECTOR galaxy_center, velocity;
-    galaxy_center.x = 0;
+    galaxy_center.x = -0.5;
     galaxy_center.y = 0;
     galaxy_center.z = 0;
 
@@ -60,7 +60,7 @@ int main(int argc, char *argv[]) {
 
     //druha galaxia
     VECTOR galaxy_center_2, velocity2;
-    galaxy_center_2.x = 1.2;
+    galaxy_center_2.x = 0.5;
     galaxy_center_2.y = 0;
     galaxy_center_2.z = 0;
 
@@ -76,7 +76,7 @@ int main(int argc, char *argv[]) {
 
     /* Initialize window system */
     glutInit(&argc, argv);
-    glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE);
+    glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
     glutInitWindowSize(1920, 1080);
     glutCreateWindow("Galaxy");
 
@@ -138,11 +138,11 @@ void myDraw() {
     for (int i = 0; i < num_star; i++) {
         glVertex3f(galaxy2.stars[i].position.x, galaxy2.stars[i].position.y, galaxy2.stars[i].position.z);
     }
-    glColor3f(0.5, 0.5, 0.5);
+    glColor3f(0.9, 0.2, 0.2);
     glPointSize(15.0);
 
     glVertex3f(galaxy.center.x,galaxy.center.y, galaxy.center.z);
-    glColor3f(0.5, 0.5, 0.5);
+    glColor3f(0.9, 0.2, 0.2);
     glPointSize(15.0*1e7);
     glVertex3f(galaxy2.center.x, galaxy2.center.y, galaxy2.center.z);
 
@@ -154,7 +154,7 @@ void start_thread(){
 
     //vytvorime strom pre vsetky hviezdy
     //   BARNESHUT *BH = BarnesHut_creat(-960,-540,-500,960,540,500);
-    BARNESHUT *BH = BarnesHut_creat(-96*1e8,-54*1e8,-50*1e8,96*1e8,54*1e8,50*1e8);
+    BARNESHUT *BH = BarnesHut_creat(-96*1e9,-54*1e9,-50*1e9,96*1e9,54*1e9,50*1e9);
     for (int i = 0;i<num_star;i++){
         BARNESHUT_add(BH,galaxy.stars[i].position,galaxy.stars[i].mass);
         BARNESHUT_add(BH,galaxy2.stars[i].position,galaxy2.stars[i].mass);
@@ -312,7 +312,8 @@ void start_thread(){
     }
 
     free_node((OCTNODE *) BH->root_node);
-    free(BH);
+//    free(BH);
+
     BH = NULL;
 }
 
@@ -346,7 +347,7 @@ void *bh_start(void *input){
         calculate_force((OCTNODE *) BH->root_node, &range[i]);
         //drift : acc[i] = range.force[i]/range.mass[i]
         range[i] = acceleration(range[i]);
-     //   range[i] = accel_from_center(range[i]);
+        range[i] = accel_from_center(range[i]);
         // kick : vel =vel + acc[i]* timestep; pos = half_time_step * vel
         range[i] = second_update(range[i]);
     }
@@ -474,8 +475,8 @@ void update_center_sec(){
 
 STAR accel_from_center(STAR star){
     double G = 6.6742367e-11; // m^3.kg^-1.s^-2
-    double EPS =3e4;
-    float num = 4.0f;
+    double EPS =3e5;
+    float num = 5.0f;
     double dx = star.position.x - galaxy.center.x;
     double dy = star.position.y - galaxy.center.y;
     double dz = star.position.z - galaxy.center.z;
@@ -491,7 +492,7 @@ STAR accel_from_center(STAR star){
     double dz2 = star.position.z - galaxy2.center.z;
     double dist2 = sqrt(dx2 * dx2 + dy2 * dy2 + dz2 * dz2);
     double preff2 = pow(dist2,2) + pow(EPS,2);
-    double pref2 = -G/pow(preff2,1.5)*galaxy.mass;
+    double pref2 = -G/pow(preff2,1.5)*galaxy2.mass;
     star.acceleration.x += pref2 * dx2 * num;
     star.acceleration.y += pref2 * dy2 * num;
     star.acceleration.z += pref2 * dz2 * num;
