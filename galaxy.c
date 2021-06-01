@@ -78,6 +78,10 @@ GALAXY create_galaxy(float heightMagnitude, float heightFrequency, int numStar, 
         galaxy.stars[i].velocity.x = velocity.x + relative_vel.x;
         galaxy.stars[i].velocity.y = velocity.y + relative_vel.y;
         galaxy.stars[i].velocity.z = velocity.z + relative_vel.z;
+//
+//        galaxy.stars[i].velocity.x = 0;
+//        galaxy.stars[i].velocity.y = 0;
+//        galaxy.stars[i].velocity.z = 0;
 
         galaxy.stars[i].acceleration.x = 0;
         galaxy.stars[i].acceleration.y = 0;
