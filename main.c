@@ -7,6 +7,8 @@
 #include <time.h>
 #include <pthread.h>
 #include <unistd.h>
+#include <signal.h>
+#include <unistd.h>
 
 void reshape(int, int);
 
@@ -27,6 +29,9 @@ void start_cal();
 void update_center_first();
 
 void update_center_sec();
+
+
+void exitfunc(int);
 #define num_star 500
 
 double half_time_step;
@@ -35,59 +40,64 @@ double time_step;
 float num = 2.0f;
 GALAXY galaxy, galaxy2;
 
+int screen = 0;
 int main(int argc, char *argv[]) {
-
-    srand((unsigned int) time(NULL));
-    float height_frequency = rand_float_from_to(0, 1.5f);
-    float height_magnitude = rand_float_from_to(0, 0.7f);
-
-    //prva galaxia
-    VECTOR galaxy_center, velocity;
-    galaxy_center.x = 0;
-    galaxy_center.y = 0;
-    galaxy_center.z = 0;
-
-   velocity.x = 10 * 1e6;
-   // velocity.x = 0;
-    velocity.y = 0;
-    velocity.z = 0;
+    signal(SIGALRM, exitfunc);
+    alarm(120);
 
 
-    galaxy = create_galaxy(height_magnitude, height_frequency, num_star, galaxy_center, velocity);
+        srand((unsigned int) time(NULL));
+        float height_frequency = rand_float_from_to(0, 1.5f);
+        float height_magnitude = rand_float_from_to(0, 0.7f);
 
-    //druha galaxia
-    VECTOR galaxy_center_2, velocity2;
-    galaxy_center_2.x = 1.2;
-    galaxy_center_2.y = 0;
-    galaxy_center_2.z = 0;
+        //prva galaxia
+        VECTOR galaxy_center, velocity;
+        galaxy_center.x = 0;
+        galaxy_center.y = 0;
+        galaxy_center.z = 0;
 
-    velocity2.x = -10 * 1e6;
- //   velocity2.x = 0;
-    velocity2.y = 0;
-    velocity2.z = 0;
+        velocity.x = 10 * 1e6;
+        // velocity.x = 0;
+        velocity.y = 0;
+        velocity.z = 0;
 
-    galaxy2 = create_galaxy(height_magnitude, height_frequency, num_star, galaxy_center_2, velocity2);
 
-    time_step = 1.0/2048;
-    half_time_step = 0.5 * time_step;
+        galaxy = create_galaxy(height_magnitude, height_frequency, num_star, galaxy_center, velocity);
 
-    /* Initialize window system */
-    glutInit(&argc, argv);
-    glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE);
-    glutInitWindowSize(1920, 1080);
-    glutCreateWindow("Galaxy");
+        //druha galaxia
+        VECTOR galaxy_center_2, velocity2;
+        galaxy_center_2.x = 1.2;
+        galaxy_center_2.y = 0;
+        galaxy_center_2.z = 0;
 
-    /* Initialize graphics */
-    myInit();
+        velocity2.x = -10 * 1e6;
+        //   velocity2.x = 0;
+        velocity2.y = 0;
+        velocity2.z = 0;
 
-    /* Display callback and enter event loop */
-    glutDisplayFunc(myDraw);
-    glutReshapeFunc(reshape);
-    glutIdleFunc(myDraw);
-    glutMainLoop();
+        galaxy2 = create_galaxy(height_magnitude, height_frequency, num_star, galaxy_center_2, velocity2);
 
-    return 1;
-}
+        time_step = 1.0 / 2048;
+        half_time_step = 0.5 * time_step;
+
+        /* Initialize window system */
+        glutInit(&argc, argv);
+        glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE);
+        glutInitWindowSize(1920, 1080);
+        glutCreateWindow("Galaxy");
+
+        /* Initialize graphics */
+        myInit();
+
+        /* Display callback and enter event loop */
+        glutDisplayFunc(myDraw);
+        glutReshapeFunc(reshape);
+        glutIdleFunc(myDraw);
+        glutMainLoop();
+
+        return 1;
+    }
+
 
 void myInit() {
     /* Background color */
@@ -120,9 +130,8 @@ void myDraw() {
     glPointSize(1.0);
     glBegin(GL_POINTS);
 
+    printf("start cal..\n");
     start_cal();
-
-
     for (int i = 0; i < num_star; i++) {
         glColor3f(1.0, 1.0, 1.0);
         glVertex3f(galaxy.stars[i].position.x, galaxy.stars[i].position.y, galaxy.stars[i].position.z);
@@ -137,6 +146,11 @@ void myDraw() {
 
     glEnd();
     glutSwapBuffers();
+
+    screen+= 1;
+    printf("%d\n",screen);
+
+
 }
 
 void start_cal(){
@@ -232,18 +246,6 @@ void gravity_calculate_acceleration(int start, int end) {
         galaxy.stars[i].acceleration.y = 0;
         galaxy.stars[i].acceleration.z = 0;
         for (int j = 0; j < num_star; j++) {
-//            if (j == i) {
-//                double dx2 = galaxy.stars[i].position.x - galaxy2.stars[j].position.x;
-//                double dy2 = galaxy.stars[i].position.y - galaxy2.stars[j].position.y;
-//                double dz2 = galaxy.stars[i].position.z - galaxy2.stars[j].position.z;
-//                double dist2 = sqrt(dx2 * dx2 + dy2 * dy2 + dz2 * dz2);
-//                double preff2 = pow(dist2,2) + pow(EPS,2);
-//                double pref2 = -G/pow(preff2,1.5)*galaxy2.stars[j].mass;
-//                galaxy.stars[i].acceleration.x += pref2 * dx2 * num;
-//                galaxy.stars[i].acceleration.y += pref2 * dy2 * num;
-//                galaxy.stars[i].acceleration.z += pref2 * dz2 * num;
-//                continue;
-//            }
 //            vypocet vzdielonosti medzi hviezdami vramci svojej galaxie
             double dx = galaxy.stars[i].position.x - galaxy.stars[j].position.x;
             double dy = galaxy.stars[i].position.y - galaxy.stars[j].position.y;
@@ -300,18 +302,7 @@ void gravity_calculate_acceleration2(int start, int end) {
         galaxy2.stars[i].acceleration.y = 0;
         galaxy2.stars[i].acceleration.z = 0;
         for (int j = 0; j < num_star; j++) {
-            if (j == i) {
-                double dx2 = galaxy2.stars[i].position.x - galaxy.stars[j].position.x;
-                double dy2 = galaxy2.stars[i].position.y - galaxy.stars[j].position.y;
-                double dz2 = galaxy2.stars[i].position.z - galaxy.stars[j].position.z;
-                double dist2 = sqrt(dx2 * dx2 + dy2 * dy2 + dz2 * dz2);
-                double preff2 = pow(dist2,2) + pow(EPS,2);
-                double pref2 = -G/pow(preff2,1.5)*galaxy.stars[j].mass;
-                galaxy2.stars[i].acceleration.x += pref2 * dx2 * num;
-                galaxy2.stars[i].acceleration.y += pref2 * dy2 * num;
-                galaxy2.stars[i].acceleration.z += pref2 * dz2 * num;
-                continue;
-            }
+
             double dx = galaxy2.stars[i].position.x - galaxy2.stars[j].position.x;
             double dy = galaxy2.stars[i].position.y - galaxy2.stars[j].position.y;
             double dz = galaxy2.stars[i].position.z - galaxy2.stars[j].position.z;
@@ -423,3 +414,8 @@ void update_center_sec(){
     galaxy2.center.z += half_time_step * galaxy2.velocity.z;
 }
 
+
+void exitfunc(int sig)
+{
+    _exit(sig);
+}
