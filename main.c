@@ -346,7 +346,7 @@ void *bh_start(void *input){
         calculate_force((OCTNODE *) BH->root_node, &range[i]);
         //drift : acc[i] = range.force[i]/range.mass[i]
         range[i] = acceleration(range[i]);
-        range[i] = accel_from_center(range[i]);
+     //   range[i] = accel_from_center(range[i]);
         // kick : vel =vel + acc[i]* timestep; pos = half_time_step * vel
         range[i] = second_update(range[i]);
     }
