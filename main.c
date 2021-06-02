@@ -34,13 +34,13 @@ void update_center_sec();
 STAR accel_from_center(STAR);
 
 void exitfunc(int);
-#define num_star 500
+#define num_star 5000
 
 double half_time_step;
 double time_step;
 
 GALAXY galaxy, galaxy2;
-
+int screen = 0;
 int main(int argc, char *argv[]) {
 
     signal(SIGALRM, exitfunc);
@@ -154,6 +154,9 @@ void myDraw() {
 
     glEnd();
     glutSwapBuffers();
+
+    screen+= 1;
+    printf("%d\n",screen);
 }
 
 void start_thread(){
