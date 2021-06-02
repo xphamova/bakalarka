@@ -9,6 +9,7 @@
 #include <unistd.h>
 #include "bh.c"
 #include <sys/shm.h>
+#include <signal.h>
 
 void reshape(int, int);
 
@@ -39,6 +40,9 @@ double time_step;
 GALAXY galaxy, galaxy2;
 
 int main(int argc, char *argv[]) {
+
+    signal(SIGALRM, exitfunc);
+    alarm(120);
 
     srand((unsigned int) time(NULL));
     float height_frequency = rand_float_from_to(0, 1.5f);
