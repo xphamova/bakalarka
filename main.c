@@ -32,6 +32,8 @@ void update_center_first();
 void update_center_sec();
 
 STAR accel_from_center(STAR);
+
+void exitfunc(int);
 #define num_star 500
 
 double half_time_step;
@@ -501,4 +503,9 @@ STAR accel_from_center(STAR star){
     star.acceleration.y += pref2 * dy2 * num;
     star.acceleration.z += pref2 * dz2 * num;
     return star;
+}
+
+void exitfunc(int sig)
+{
+    _exit(sig);
 }
