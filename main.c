@@ -20,9 +20,9 @@ void gravity_calculate_acceleration(int,int);
 
 void gravity_calculate_acceleration2(int,int);
 
-void *calculate_galaxy2(void*);
+void calculate_galaxy2();
 
-void* calculate_galaxy1(void*);
+void calculate_galaxy1();
 
 void start_cal();
 
@@ -32,7 +32,7 @@ void update_center_sec();
 
 
 void exitfunc(int);
-#define num_star 500
+#define num_star 5000
 
 double half_time_step;
 double time_step;
@@ -154,48 +154,46 @@ void myDraw() {
 }
 
 void start_cal(){
-    int range1[2], range2[2];
-    void *send_range1, *send_range2;
-    double *receive_range1, *receive_range2, *receive_range3, *receive_range4;
-    range1[0]=0;
-    range1[1]= num_star/2;
-    range2[0]=num_star/2;
-    range2[1]=num_star;
+//    int range1[2], range2[2];
+//    void *send_range1, *send_range2;
+//    double *receive_range1, *receive_range2, *receive_range3, *receive_range4;
+//    range1[0]=0;
+//    range1[1]= num_star/2;
+//    range2[0]=num_star/2;
+//    range2[1]=num_star;
+//
+//    send_range1 = &range1;
+//    send_range2 = &range2;
+//
+//    pthread_t tid1, tid2, tid3, tid4;
+//
+//    pthread_create(&tid1, NULL, calculate_galaxy1, (void *) send_range1);//start thread
+//    pthread_create(&tid2, NULL, calculate_galaxy1, (void *) send_range2);
+//    pthread_create(&tid3, NULL, calculate_galaxy2, (void *) send_range1);
+//    pthread_create(&tid4, NULL, calculate_galaxy2, (void *) send_range2);
+//
+//    pthread_join(tid1, (void **) &receive_range1);
+//    pthread_join(tid2, (void **) &receive_range2);
+//    pthread_join(tid3, (void **) &receive_range3);
+//    pthread_join(tid4, (void **) &receive_range4);
 
-    send_range1 = &range1;
-    send_range2 = &range2;
-
-    pthread_t tid1, tid2, tid3, tid4;
-
-    pthread_create(&tid1, NULL, calculate_galaxy1, (void *) send_range1);//start thread
-    pthread_create(&tid2, NULL, calculate_galaxy1, (void *) send_range2);
-    pthread_create(&tid3, NULL, calculate_galaxy2, (void *) send_range1);
-    pthread_create(&tid4, NULL, calculate_galaxy2, (void *) send_range2);
-
-    pthread_join(tid1, (void **) &receive_range1);
-    pthread_join(tid2, (void **) &receive_range2);
-    pthread_join(tid3, (void **) &receive_range3);
-    pthread_join(tid4, (void **) &receive_range4);
+   calculate_galaxy1();
+   calculate_galaxy2();
 
     update_center_first();
     update_center_sec();
 }
 
-void* calculate_galaxy1(void* param){
-    int *ran = (int *) param;
-    int start, end;
+void calculate_galaxy1(){
 
-    start = *(ran);
-    end = *(ran + 1);
-
-    for(int i = start; i<end; i++){
+    for(int i = 0; i<num_star; i++){
         galaxy.stars[i].position.x += half_time_step * galaxy.stars[i].velocity.x;
         galaxy.stars[i].position.y += half_time_step * galaxy.stars[i].velocity.y;
         galaxy.stars[i].position.z += half_time_step * galaxy.stars[i].velocity.z;
     }
-    gravity_calculate_acceleration(start,end);
+    gravity_calculate_acceleration(0,num_star);
 
-    for(int i = start; i<end; i++){
+    for(int i = 0; i<num_star; i++){
 
         galaxy.stars[i].velocity.x += time_step * galaxy.stars[i].acceleration.x;
         galaxy.stars[i].velocity.y += time_step * galaxy.stars[i].acceleration.y;
@@ -210,22 +208,17 @@ void* calculate_galaxy1(void* param){
 
 }
 
-void *calculate_galaxy2(void* param) {
-    int *ran = (int *) param;
-    int start, end;
+void calculate_galaxy2() {
 
-    start = *(ran);
-    end = *(ran + 1);
-
-    for (int i = start; i < end; i++) {
+    for (int i = 0; i < num_star; i++) {
         galaxy2.stars[i].position.x += half_time_step * galaxy2.stars[i].velocity.x;
         galaxy2.stars[i].position.y += half_time_step * galaxy2.stars[i].velocity.y;
         galaxy2.stars[i].position.z += half_time_step * galaxy2.stars[i].velocity.z;
     }
 
 
-    gravity_calculate_acceleration2(start,end);
-    for (int i = start; i < end; i++) {
+    gravity_calculate_acceleration2(0,num_star);
+    for (int i = 0; i < num_star; i++) {
         galaxy2.stars[i].velocity.x += time_step * galaxy2.stars[i].acceleration.x;
         galaxy2.stars[i].velocity.y += time_step * galaxy2.stars[i].acceleration.y;
         galaxy2.stars[i].velocity.z += time_step * galaxy2.stars[i].acceleration.z;
