@@ -11,7 +11,7 @@ typedef struct {
 
     struct OCTNODE *children[8];
 
-    void *usr_val;
+    void *point_to;
 
     double node_mass;
 
@@ -60,7 +60,7 @@ struct OCTNODE * create_node(double x1, double y1, double z1, double x2, double 
     node->children[7] = NULL;
 
     node->bodies = 0;
-    node->usr_val = NULL;
+    node->point_to = NULL;
     return (struct OCTNODE *) node;
 }
 //ok
@@ -70,12 +70,12 @@ int insert(OCTNODE *node,VECTOR position_star,double mass,void *usr_val){
     if (node->bodies == 0){
         node->position_star = position_star;
         node->node_mass = mass;
-        node->usr_val = usr_val;
+        node->point_to = usr_val;
     }
     else{
         if (node->bodies == 1) {
-            sub_insert(node, node->position_star,mass,node->usr_val);
-            node->usr_val = NULL;
+            sub_insert(node, node->position_star,mass,node->point_to);
+            node->point_to = NULL;
         }else sub_insert(node,position_star,mass,usr_val);
     }
     node->bodies++;
@@ -119,7 +119,7 @@ int sub_insert(OCTNODE *node,VECTOR position,double mass,void *usr_val){
         (node->children[sub]) = create_node(min_x,min_y,min_z,max_x,max_y,max_z);
 
     //vratime uzol
-   // insert((OCTNODE *) node->children[sub], position, mass, usr_val);
+   // insert((OCTNODE *) node->children[sub], position, mass, point_to);
       return insert((OCTNODE *) node->children[sub], position,mass,usr_val);
 }
 //ok
@@ -156,19 +156,15 @@ void Barneshut_cal_tree(OCTNODE* node){
     if(node->bodies == 1)
         return ;
     else{
-        node->usr_val = malloc(sizeof (BH_NODE));
-        BH_NODE *Bh_node = (BH_NODE*)(node->usr_val);
-        Bh_node->mass = 0;
-        Bh_node->COM.x = 0;
-        Bh_node->COM.y = 0;
-        Bh_node->COM.z = 0;
+        node->point_to = malloc(sizeof (BH_NODE));
+        BH_NODE *Bh_node = (BH_NODE*)(node->point_to);
+        Bh_node->mass = 0;Bh_node->COM.x = 0;Bh_node->COM.y = 0;Bh_node->COM.z = 0;
         for (int i=0; i<8 ; i++){
-            //ak dieta neexistuje,pokracuj
             if(!node->children[i])
                 continue;
             Barneshut_cal_tree((OCTNODE *) node->children[i]);
             OCTNODE *child_node = (OCTNODE *) node->children[i];
-            BH_NODE *child_bh_node = (BH_NODE*) child_node->usr_val;
+            BH_NODE *child_bh_node = (BH_NODE*) child_node->point_to;
             double child_mass = child_bh_node->mass;
             Bh_node->mass += child_mass;
             Bh_node->COM.x += child_mass*child_bh_node->COM.x;
@@ -187,24 +183,19 @@ int calculate_force(OCTNODE *node,STAR *star){
         return 0;
     double G = 6.6742367e-11; // m^3.kg^-1.s^-2
     double EPS = 3e3;
-    star->force.x = 0;
-    star->force.y = 0;
-    star->force.z = 0;
+    star->force.x = 0;star->force.y = 0;star->force.z = 0;
 
-    //nacitame hodnoty uzla
-    BH_NODE bhNode = * (BH_NODE*)(node->usr_val);
-    //vypocet vzdialenosti medzi COM a bodom
+    BH_NODE bhNode = * (BH_NODE*)(node->point_to);
+
     double div_x = (bhNode.COM.x-star->position.x);
     double div_y = (bhNode.COM.y-star->position.y);
     double div_z = (bhNode.COM.z-star->position.z);
     double radius_ = sqrt(pow(div_x,2)+pow(div_y,2)+pow(div_z,2));
     if (radius_ == 0)
         return 1;
-    // vypocet sirky uzla kvoli 3d vyratame priemer
     double width = ((node->vector_top.x-node->vector_low.x) + (node->vector_top.y-node->vector_low.y) + (node->vector_top.z-node->vector_low.z))/3;
-    // prahova hodnota, vseobecne pouzivana 0.5
-    if (width/radius_ < 0.5){
 
+    if (width/radius_ < 0.5){
        double denom = pow(radius_,2) + pow(EPS,2);
         star->force.x = (G * bhNode.mass * star->mass * (bhNode.COM.x-star->position.x))/pow(denom,1.5) * 5.0f;
         star->force.y = (G * bhNode.mass * star->mass * (bhNode.COM.y-star->position.y))/pow(denom,1.5) * 5.0f;
@@ -230,7 +221,7 @@ int calculate_force(OCTNODE *node,STAR *star){
 void free_barneshut_tree(OCTNODE *node){
     if(!node)
         return;
-    free(node->usr_val);
+    free(node->point_to);
     free_barneshut_tree((OCTNODE *) node->children[0]);
     free_barneshut_tree((OCTNODE *) node->children[1]);
     free_barneshut_tree((OCTNODE *) node->children[2]);
@@ -243,7 +234,7 @@ void free_barneshut_tree(OCTNODE *node){
 }
 void free_node(OCTNODE *node) {
     if (!node) return;
-    node->usr_val = NULL;
+    node->point_to = NULL;
     free_node((OCTNODE *) node->children[0]);
     free_node((OCTNODE *) node->children[1]);
     free_node((OCTNODE *) node->children[2]);

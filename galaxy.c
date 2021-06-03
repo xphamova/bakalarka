@@ -16,7 +16,7 @@ typedef struct {
 } STAR;
 
 typedef struct {
-    STAR stars[5000];
+    STAR stars[10000];
     VECTOR center;
     double mass;
     VECTOR acceleration;

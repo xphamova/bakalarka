@@ -34,7 +34,7 @@ void update_center_sec();
 STAR accel_from_center(STAR);
 
 void exitfunc(int);
-#define num_star 5000
+#define num_star 10000
 
 double half_time_step;
 double time_step;
