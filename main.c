@@ -32,7 +32,7 @@ void update_center_sec();
 
 
 void exitfunc(int);
-#define num_star 500
+#define num_star 10000
 
 double half_time_step;
 double time_step;
