@@ -32,7 +32,7 @@ void update_center_sec();
 
 
 void exitfunc(int);
-#define num_star 10000
+#define num_star 5000
 
 double half_time_step;
 double time_step;
@@ -43,7 +43,7 @@ GALAXY galaxy, galaxy2;
 int screen = 0;
 int main(int argc, char *argv[]) {
     signal(SIGALRM, exitfunc);
-    alarm(120);
+    alarm(7200);
 
 
         srand((unsigned int) time(NULL));
@@ -66,7 +66,7 @@ int main(int argc, char *argv[]) {
 
         //druha galaxia
         VECTOR galaxy_center_2, velocity2;
-        galaxy_center_2.x = 1.2;
+        galaxy_center_2.x = 1.15;
         galaxy_center_2.y = 0;
         galaxy_center_2.z = 0;
 
@@ -130,7 +130,6 @@ void myDraw() {
     glPointSize(1.0);
     glBegin(GL_POINTS);
 
-    printf("start cal..\n");
     start_cal();
     for (int i = 0; i < num_star; i++) {
         glColor3f(1.0, 1.0, 1.0);
@@ -139,8 +138,10 @@ void myDraw() {
         glVertex3f(galaxy2.stars[i].position.x, galaxy2.stars[i].position.y, galaxy2.stars[i].position.z);
     }
 
-    glVertex3f(0, 0, 0);
-    glColor3f(1.0, 1.0, 1.0);
+    glColor3f(1.0, 0.2, 0.2);
+    glPointSize(5.0);
+    glVertex3f(galaxy.center.x, galaxy.center.y, galaxy.center.z);
+    glColor3f(1.0, 0.2, 0.2);
     glPointSize(5.0);
     glVertex3f(galaxy2.center.x, galaxy2.center.y, galaxy2.center.z);
 
@@ -148,7 +149,7 @@ void myDraw() {
     glutSwapBuffers();
 
     screen+= 1;
-    printf("%d\n",screen);
+
 
 
 }
